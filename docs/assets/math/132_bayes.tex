@@ -1,0 +1,49 @@
+\subsection{Bayesian Optimization Framework}\label{subsec:bayesopt}
+This section covers optimization problems in the following form
+\begin{equation}
+  \min_{\bm{x}\in X}~
+  f(\bm{x})\quad
+  \text{subject to:}\quad
+  \bm{x}\in\Omega=\{\bm{x}:\bm{h}(\bm{x})=\bm{0},~\bm{c}(\bm{x})\ge\bm{0}\},
+  \tag{\(P\)}\label{prob:basic}
+\end{equation}
+where~\(\bm{x}={[x_1, x_2, \ldots, x_n]}^\top\) is a vector that represents the decision variables,~\(f:\mathcal{X}\rightarrow\R\) is the objective function,~\(\mathcal{X}\) is the domain,~\(\Omega\) is the set of points allowed as a solution, and~\(\bm{h}:\mathcal{X}\rightarrow\R^m\) and~\(\bm{c}:\mathcal{X}\rightarrow\R^k\) are the vectors of constraints~\cite{audet2021}.
+
+BO~\cite{frazier2018,jones1998,shahriari2016} is a sequential, GP-based framework for global optimization of expensive black-box problems. A GP~\cite{rasmussen2005} prior is commonly employed to capture uncertainty in the objective function, enabling principled trade-offs between exploration and exploitation~\cite{cordelier2025}.
+
+The GP regression framework is presented in generic terms using~\(s:\mathcal{X}\to\R\) to denote any scalar function requiring surrogate modeling. In the optimization context,~\(s(\bm{x})\) may represent an objective function~\(f(\bm{x})\), a constraint function~\(c_j(\bm{x})\), or any other expensive-to-evaluate black-box quantity. Subsequent sections apply this framework to specific function types.
+Rather than fitting a single parametric model, a GP~\cite{rasmussen2005} places a probability distribution directly over functions. A GP is fully specified by its mean function~\(m(\bm{x})\) and covariance (kernel) function~\(k(\bm{x}, \bm{x}')\)~\cite{rasmussen2005}. Without loss of generality, assume~\(m(\bm{x}) = 0\). The GP prior is then
+\begin{equation*}
+  s(\bm{x}) \sim \mathcal{GP}\left(0, k(\bm{x}, \bm{x}')\right).
+\end{equation*}
+Once observations~\(\D=\{\bm{X}, \bm{s}\}\) are available, also know as Design of Experiments (DoE), the GP prior is updated to a posterior distribution~\(\mathcal{N}(\mu_s(\bm{x}), \sigma_s^2(\bm{x}))\). The posterior mean~\(\mu_s(\bm{x})\) serves as a weighted sum of the training observations, while the variance~\(\sigma_s^2(\bm{x})\) quantifies the epistemic uncertainty. At observed points, the model becomes certain, while at unobserved points, it retains calibrated uncertainty. This update follows the rules of conditional Gaussian distributions where the posterior mean and variance are analytically computable~\cite{rasmussen2005}.
+
+At each iteration, BO builds a GP model using all available evaluations (current DoE), and an acquisition function~\cite{jones1998,shahriari2016} defined over the surrogate is maximized to select the next evaluation point. This decouples the expensive function evaluation from the search for a promising candidate, allowing near-optimal solutions to be located with a small number of evaluations~\cite{jones1998,priem2020}. The acquisition function~\(\alpha: \mathcal{X} \to \R\)~\cite{jones1998,frazier2018,shahriari2016} guides the optimization by balancing exploration and exploitation. Let~\(s^* = \min_{i = 1,\ldots,N} s(\bm{x}_i)\) denote the best observed value. A popular acquisition function choice is the Expected Improvement (EI) criterion~\cite{jones1998}, which  assesses the average amount by which the result would improve upon the current best~\(s^*\) if~\(s\) is evaluated at~\(\bm{x}\)
+\begin{equation}\label{eqn:ei}
+  \alpha_\text{EI}(\bm{x}) = (s^* - \mu_s(\bm{x})) \Phi(Z(\bm{x})) + \sigma_s(\bm{x}) \phi(Z(\bm{x})),
+\end{equation}
+where~\(Z(\bm{x}) = (s^* - \mu_s(\bm{x}))/\sigma_s(\bm{x})\), and~\(\Phi\) and~\(\phi\) denote the standard normal cumulative distribution and probability density functions.
+To address numerical vanishing of gradients in regions far from the optimum, the Log Expected Improvement (LogEI)~\cite{ament2023} is used
+\begin{equation}\label{eqn:logei}
+  \alpha_\text{LogEI}(\bm{x}) = \texttt{log\_h}(Z(\bm{x})) + \log\sigma_s(\bm{x}).
+\end{equation}
+
+Because the logarithm is a monotone increasing function, LogEI and EI share the same maximizer: the point~\(\bm{x}^*\) that maximizes EI also maximizes LogEI. The difference is purely numerical: by working in log space, gradients that would be zero in the original scale become finite and informative, making the acquisition maximization well-conditioned even in difficult regions. The numerically stable helper function~\(\texttt{log\_h}: \mathbb{R} \to \mathbb{R}\)~\cite{ament2023} handles three regimes of~\(Z(\bm{x})\) to maintain precision throughout:
+\begin{equation}\label{eqn:log_h}
+  \texttt{log\_h}(z) =
+  \begin{cases}
+    \log\left(\phi(z) + z\Phi(z)\right) & z > -1 \\
+    -z^2/2 - c + \log\left(1 - \texttt{log1mexp}\left(\log\left(\texttt{erfcx}\left(\dfrac{-z}{\sqrt{2}}\right)|z|\right) + c\right)\right) & -1/\sqrt{\varepsilon} < z \le -1 \\
+    -z^2/2 - c - 2\log|z| & z \le -1/\sqrt{\varepsilon}
+  \end{cases},
+\end{equation}
+with~\(c = \tfrac{1}{2}\log(2\pi)\),~\(\varepsilon > 0\) is the machine precision,~\(\texttt{log1mexp}(z) = \log(1 - \exp(z))\), and~\(\texttt{erfcx}(z) = \exp(z^2)\operatorname{erfc}(z)\) the scaled complementary error function~\cite{ament2023}. LogEI is the preferred formulation whenever gradient-based acquisition maximization is used~\cite{ament2023,cordelier2025}.
+
+Many engineering optimization problems involve constraints that are themselves expensive to evaluate or available only as black-box outputs.
+Super Efficient Global Optimization (SEGO)~\cite{sasena2002} is a BO framework for expensive black-box constrained optimization problems of the form~\eqref{prob:basic}. \Cref{alg:sego} presents the SEGO procedure following~\cite{sasena2002,cordelier2025}.
+
+\input{algorithms/sego}
+
+In~\Cref{alg:sego}, when the feasible region is unknown at initialization, space-filling designs such as Latin Hypercube Sampling (LHS)~\cite{mckay1979} provide initial coverage. The Upper Trust Bound~\cite{priem2020b} approach addresses this by constructing a unified criterion for mixed constraint types, including hidden constraints~\cite{ledigabel2024} that may cause simulation failure without returning a function value.
+
+In the next section, we propose a new BO framework for adapted for expensive-to-compute CO problems.
