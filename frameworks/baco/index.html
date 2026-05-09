@@ -817,67 +817,67 @@
 <div class="arithmatex">\[
 \begin{align*}
     &amp;\max_{
-        \overline{\bm{z}},
-        \overline{\bm{x}},
-        \overline{\bm{y}}
-    }\quad &amp;&amp; \alpha_f(
-        \overline{\bm{z}},
-        \overline{\bm{x}},
-        \overline{\bm{y}}
+        \overline{\mathbf{z}},
+        \overline{\mathbf{x}},
+        \overline{\mathbf{y}}
+    }\ &amp;&amp; \alpha_f(
+        \overline{\mathbf{z}},
+        \overline{\mathbf{x}},
+        \overline{\mathbf{y}}
     ) \tag{\(\widetilde{P}_\text{sys}\)} \\
-    &amp;\text{subject to:}\quad
-    &amp;&amp;\bm{\mu_c}(
-        \overline{\bm{z}},
-        \overline{\bm{x}},
-        \overline{\bm{y}},
-    ) &amp;&amp;\geq \bm{0}\\
+    &amp;\text{subject to:}\
+    &amp;&amp;\mathbf{\mu_c}(
+        \overline{\mathbf{z}},
+        \overline{\mathbf{x}},
+        \overline{\mathbf{y}},
+    ) &amp;&amp;\geq \mathbf{0}\\
     %
     &amp;  &amp;&amp; \mu_{J_i}(
-        \overline{\bm{z}},
-        \overline{\bm{x}}_i,
-        \overline{\bm{y}},
-        \underline{\bm{z}}_i^*,
-        \underline{\bm{x}}_i^*
-    ) &amp;&amp;= 0\qquad \text{for all}\quad i\in\{1\cdots N\}
+        \overline{\mathbf{z}},
+        \overline{\mathbf{x}}_i,
+        \overline{\mathbf{y}},
+        \underline{\mathbf{z}}_i^*,
+        \underline{\mathbf{x}}_i^*
+    ) &amp;&amp;= 0\ \text{for all}\ i\in\{1\cdots N\}
 \end{align*}
 \]</div>
 <p>Subsystem <span class="arithmatex">\(i\)</span> level:</p>
 <div class="arithmatex">\[
 \begin{equation*}
     \max_{
-        \underline{\bm{z}}_i,
-        \underline{\bm{x}}_i
-    }\quad \alpha_{J_i}(
-        \overline{\bm{z}},
-        \overline{\bm{x}}_i,
-        \overline{\bm{y}},
-        \underline{\bm{z}}_i,
-        \underline{\bm{x}}_i
-    ) \tag{\(\widetilde{P}_i\)}\quad
-    \text{subject to:}\quad
-    \bm{\mu}_{\bm{g}_i}(
-        \overline{\bm{y}}_{j\neq i},
-        \underline{\bm{z}}_i,
-        \underline{\bm{x}}_i
-    )\geq\bm{0}
+        \underline{\mathbf{z}}_i,
+        \underline{\mathbf{x}}_i
+    }\ \alpha_{J_i}(
+        \overline{\mathbf{z}},
+        \overline{\mathbf{x}}_i,
+        \overline{\mathbf{y}},
+        \underline{\mathbf{z}}_i,
+        \underline{\mathbf{x}}_i
+    ) \tag{\(\widetilde{P}_i\)}\
+    \text{subject to:}\
+    \mathbf{\mu}_{\mathbf{g}_i}(
+        \overline{\mathbf{y}}_{j\neq i},
+        \underline{\mathbf{z}}_i,
+        \underline{\mathbf{x}}_i
+    )\geq\mathbf{0}
 \end{equation*}
 \]</div>
 <p>The discrepancy function:</p>
 <div class="arithmatex">\[
 \begin{equation*}
     J(
-        \overline{\bm{z}},
-        \overline{\bm{x}}_i,
-        \overline{\bm{y}},
-        \underline{\bm{z}}_i,
-        \underline{\bm{x}}_i
+        \overline{\mathbf{z}},
+        \overline{\mathbf{x}}_i,
+        \overline{\mathbf{y}},
+        \underline{\mathbf{z}}_i,
+        \underline{\mathbf{x}}_i
     ) = J_i =
-        \bigl\|\overline{\bm{z}}-\underline{\bm{z}}_i\bigr\|^2 +
-        \bigl\|\overline{\bm{x}}_i-\underline{\bm{x}}_i\bigr\|^2 +
-        \bigl\|\overline{\bm{y}}_i-\bm{y}_i\bigl(
-        \overline{\bm{y}}_{j\neq i},
-        \underline{\bm{z}}_i,
-        \underline{\bm{x}}_i
+        \bigl\|\overline{\mathbf{z}}-\underline{\mathbf{z}}_i\bigr\|^2 +
+        \bigl\|\overline{\mathbf{x}}_i-\underline{\mathbf{x}}_i\bigr\|^2 +
+        \bigl\|\overline{\mathbf{y}}_i-\mathbf{y}_i\bigl(
+        \overline{\mathbf{y}}_{j\neq i},
+        \underline{\mathbf{z}}_i,
+        \underline{\mathbf{x}}_i
     \bigr)\bigr\|^2
 \end{equation*}
 \]</div>
@@ -909,32 +909,32 @@
 <tr>
 <td style="text-align: left;"><code>problem</code></td>
 <td style="text-align: left;"><code>Problem</code></td>
-<td style="text-align: left;">Local subsystem optimization problem with objective and constraints</td>
+<td style="text-align: left;">Local subsystem optimization problem with objective and constraints.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>z_idxs</code></td>
 <td style="text-align: left;"><code>np.ndarray</code></td>
-<td style="text-align: left;">Indices of shared design variables in the global variable vector</td>
+<td style="text-align: left;">Indices of shared design variables in the global variable vector.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>x_idxs</code></td>
 <td style="text-align: left;"><code>np.ndarray</code></td>
-<td style="text-align: left;">Indices of local design variables in the global variable vector</td>
+<td style="text-align: left;">Indices of local design variables in the global variable vector.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>y_idxs</code></td>
 <td style="text-align: left;"><code>np.ndarray</code></td>
-<td style="text-align: left;">Indices of subsystem outputs in the global output vector</td>
+<td style="text-align: left;">Indices of subsystem outputs in the global output vector.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>y_coupled_idxs</code></td>
 <td style="text-align: left;"><code>np.ndarray</code></td>
-<td style="text-align: left;">list of index arrays for coupled variables (targets) from other subsystems</td>
+<td style="text-align: left;">list of index arrays for coupled variables (targets) from other subsystems.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>surrogate_config</code></td>
-<td style="text-align: left;"><code>SMTGPConfig \| TorchGPConfig</code></td>
-<td style="text-align: left;">GP configuration</td>
+<td style="text-align: left;"><code>SMTGPConfig</code> or <code>TorchGPConfig</code></td>
+<td style="text-align: left;">GP configuration.</td>
 </tr>
 </tbody>
 </table>
@@ -958,17 +958,17 @@
 <tr>
 <td style="text-align: left;"><code>problem</code></td>
 <td style="text-align: left;"><code>Problem</code></td>
-<td style="text-align: left;">System-level optimization problem with objective and constraints</td>
+<td style="text-align: left;">System-level optimization problem with objective and constraints.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>subsystems</code></td>
 <td style="text-align: left;"><code>list[COSubsystem]</code></td>
-<td style="text-align: left;">All subsystems in the MDO problem</td>
+<td style="text-align: left;">All subsystems in the MDO problem.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>surrogate_config</code></td>
-<td style="text-align: left;"><code>SMTGPConfig \| TorchGPConfig</code></td>
-<td style="text-align: left;">GP configuration</td>
+<td style="text-align: left;"><code>SMTGPConfig</code> or <code>TorchGPConfig</code></td>
+<td style="text-align: left;">GP configuration.</td>
 </tr>
 </tbody>
 </table>
@@ -985,26 +985,26 @@
 <tr>
 <td style="text-align: left;"><code>system</code></td>
 <td style="text-align: left;"><code>COSystem</code></td>
-<td style="text-align: left;">System-level coordinator with subsystems</td>
+<td style="text-align: left;">System-level coordinator with subsystems.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>subsystem_optimizer</code></td>
-<td style="text-align: left;"><code>str \| Callable</code></td>
+<td style="text-align: left;"><code>str</code> or <code>Callable</code></td>
 <td style="text-align: left;">Optimizer for subsystem minimization (e.g., 'cobyqa', 'cobyla')</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>system_optimizer</code></td>
-<td style="text-align: left;"><code>str \| Callable</code></td>
+<td style="text-align: left;"><code>str</code> or <code>Callable</code></td>
 <td style="text-align: left;">Optimizer for system-level coordination.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>n_initial</code></td>
-<td style="text-align: left;"><code>int \| Callable \| None</code></td>
+<td style="text-align: left;"><code>int</code> or <code>Callable</code></td>
 <td style="text-align: left;">Size of the initial Design of Experiments.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>acq_func</code></td>
-<td style="text-align: left;"><code>Callable \| None</code></td>
+<td style="text-align: left;"><code>Callable</code></td>
 <td style="text-align: left;">Choice of acquisition function.</td>
 </tr>
 <tr>
@@ -1015,16 +1015,16 @@
 <tr>
 <td style="text-align: left;"><code>epsilon_J</code></td>
 <td style="text-align: left;"><code>float</code></td>
-<td style="text-align: left;">Convergence tolerance for coupling discrepancy J_total (default: 1e-6)</td>
+<td style="text-align: left;">Convergence tolerance for coupling discrepancy <span class="arithmatex">\(J_\text{total}\)</span>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>epsilon_h</code></td>
 <td style="text-align: left;"><code>float</code></td>
-<td style="text-align: left;">Convergence tolerance for constraint violation h_total (default: 1e-6)</td>
+<td style="text-align: left;">Convergence tolerance for constraint violation <span class="arithmatex">\(h_\text{total}\)</span>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>max_eval</code></td>
-<td style="text-align: left;"><code>int \| None</code></td>
+<td style="text-align: left;"><code>int</code></td>
 <td style="text-align: left;">Evaluation budget.</td>
 </tr>
 <tr>
@@ -1035,12 +1035,12 @@
 <tr>
 <td style="text-align: left;"><code>name</code></td>
 <td style="text-align: left;"><code>str</code></td>
-<td style="text-align: left;">Field to define problem name</td>
+<td style="text-align: left;">Field to define problem name.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>solver</code></td>
 <td style="text-align: left;"><code>str</code></td>
-<td style="text-align: left;">Field to define solver name (default = "CO")</td>
+<td style="text-align: left;">Field to define solver name.</td>
 </tr>
 </tbody>
 </table>

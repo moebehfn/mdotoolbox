@@ -905,9 +905,9 @@
 <h2 id="1-conceptual-decompositon">1. Conceptual Decompositon</h2>
 <p>Before writing code, identify the three types of variables in your MDO problem:</p>
 <ol>
-<li><strong>Shared Variables (<span class="arithmatex">\(z\)</span>):</strong> Design variables that are inputs to multiple disciplines (e.g., altitude, Mach number).</li>
-<li><strong>Local Variables (<span class="arithmatex">\(x_i\)</span>):</strong> Design variables that are inputs to only one specific discipline <span class="arithmatex">\(i\)</span> (e.g., wing thickness for aerodynamics).</li>
-<li><strong>Coupling Variables (<span class="arithmatex">\(y\)</span>):</strong> Outputs from one discipline that serve as inputs to another (e.g., aerodynamic loads acting on the structure).</li>
+<li><strong>Shared Variables (<span class="arithmatex">\(\mathbf{z}\)</span>):</strong> Design variables that are inputs to multiple disciplines (e.g., altitude, Mach number).</li>
+<li><strong>Local Variables (<span class="arithmatex">\(\mathbf{x}_i\)</span>):</strong> Design variables that are inputs to only one specific discipline <span class="arithmatex">\(i\)</span> (e.g., wing thickness for aerodynamics).</li>
+<li><strong>Coupling Variables (<span class="arithmatex">\(\mathbf{y}\)</span>):</strong> Outputs from one discipline that serve as inputs to another (e.g., aerodynamic loads acting on the structure).</li>
 </ol>
 <hr />
 <h2 id="2-defining-core-components">2. Defining Core Components</h2>
@@ -983,10 +983,10 @@
 <h3 id="step-2-define-index-mappings">Step 2: Define Index Mappings</h3>
 <p>You must tell the framework how variables in the global vectors (<span class="arithmatex">\(z, x, y\)</span>) map to each subsystem.</p>
 <ul>
-<li><code>z_idxs</code>: Indices in the shared variable vector <span class="arithmatex">\(z\)</span>.</li>
-<li><code>x_idxs</code>: Indices in the <strong>local</strong> variable vector <span class="arithmatex">\(x\)</span>.</li>
-<li><code>y_idxs</code>: Indices in the <strong>coupling</strong> variable vector <span class="arithmatex">\(y\)</span> that this subsystem <strong>produces</strong>.</li>
-<li><code>y_coupled_idxs</code>: A list of arrays. Each array contains indices in <span class="arithmatex">\(y\)</span> that this subsystem <strong>receives</strong> as input.</li>
+<li><code>z_idxs</code>: Indices in the shared variable vector <span class="arithmatex">\(\mathbf{z}\)</span>.</li>
+<li><code>x_idxs</code>: Indices in the <strong>local</strong> variable vector <span class="arithmatex">\(\mathbf{x}\)</span>.</li>
+<li><code>y_idxs</code>: Indices in the <strong>coupling</strong> variable vector <span class="arithmatex">\(\mathbf{y}\)</span> that this subsystem <strong>produces</strong>.</li>
+<li><code>y_coupled_idxs</code>: A list of arrays. Each array contains indices in <span class="arithmatex">\(\mathbf{y}\)</span> that this subsystem <strong>receives</strong> as input.</li>
 </ul>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Subsystem 1 Mappings</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="c1"># z = [z1, z2], x = [x1], y = [y1, y2]</span>
