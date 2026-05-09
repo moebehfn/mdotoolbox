@@ -15,7 +15,6 @@
 """src/mdotoolbox/surrogates/surrogates.py"""
 
 import warnings
-from typing import Optional
 
 import numpy as np
 
@@ -25,7 +24,7 @@ from .configurations import FastGPConfig, StudentTConfig, TorchGPConfig
 class TorchGP:
     """GPyTorch-backed GP surrogate with SMT-compatible API."""
 
-    def __init__(self, config: Optional[TorchGPConfig] = None):
+    def __init__(self, config: TorchGPConfig | None = None):
         import torch
 
         self.config = config if config is not None else TorchGPConfig()
@@ -156,7 +155,7 @@ class TorchGP:
 class FastGP:
     """Fast Gaussian Process using scikit-learn + PCA dimension reduction."""
 
-    def __init__(self, config: Optional[FastGPConfig] = None):
+    def __init__(self, config: FastGPConfig | None = None):
         from sklearn.decomposition import PCA
         from sklearn.gaussian_process import GaussianProcessRegressor
         from sklearn.gaussian_process.kernels import RBF, ConstantKernel, WhiteKernel
@@ -225,7 +224,7 @@ class FastGP:
 class StudentTProcess:
     """Student t-Process regression model using PyMC for Bayesian inference."""
 
-    def __init__(self, config: Optional[StudentTConfig] = None):
+    def __init__(self, config: StudentTConfig | None = None):
         self.config = config if config is not None else StudentTConfig()
         self.model = None
         self.trace = None

@@ -249,10 +249,10 @@ def scalable_mdo_problem(
     return {
         "system_problem": system_problem,
         "subsystems": subsystems,
-        "n_z_bar": n_z_bar,
-        "n_x_under_per_discipline": n_x_under_per_discipline,
-        "n_y_per_discipline": n_y_per_discipline,
+        "n_shared": n_z_bar,
+        "n_local_per_discipline": n_x_under_per_discipline,
+        "n_coupling_per_discipline": n_y_per_discipline,
         "n_disciplines": n_disciplines,
-        "n_x_under": n_x_under_per_discipline * n_disciplines,
-        "n_y": n_y_per_discipline * n_disciplines,
+        "n_local": n_x_under_per_discipline * n_disciplines,
+        "n_coupling": n_y_per_discipline * n_disciplines,
     }

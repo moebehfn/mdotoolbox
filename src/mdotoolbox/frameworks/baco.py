@@ -20,8 +20,9 @@ import copy
 import inspect
 import time
 import warnings
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Callable, List, Union
+from typing import TYPE_CHECKING
 
 import numpy as np
 from smt.sampling_methods import LHS
@@ -126,7 +127,7 @@ def _run_one_start_subsystem(
 
     if constraints:
         _constraints_arg = {"ineq": lambda x: constraints_mean_func(x)[0]}
-        if any((c.ctype == "eq" for c in constraints)):
+        if any(c.ctype == "eq" for c in constraints):
             _constraints_arg["eq"] = lambda x: constraints_mean_func(x)[1]
     else:
         _constraints_arg = None
@@ -208,7 +209,7 @@ def _run_one_start_system(
         return (np.array(c_means_ineq), np.array(c_means_eq))
 
     _constraints_arg = {"ineq": lambda x: constraints_mean_func(x)[0]}
-    if any((c.ctype == "eq" for c in constraints)):
+    if any(c.ctype == "eq" for c in constraints):
         _constraints_arg["eq"] = lambda x: constraints_mean_func(x)[1]
     try:
         return opt(acquisition, x0, bounds, _constraints_arg)
@@ -224,8 +225,8 @@ class BACOSubsystem:
     z_idxs: np.ndarray
     x_idxs: np.ndarray
     y_idxs: np.ndarray
-    y_coupled_idxs: List[np.ndarray]
-    surrogate_config: Union[SMTGPConfig, TorchGPConfig, None] = None
+    y_coupled_idxs: list[np.ndarray]
+    surrogate_config: SMTGPConfig | TorchGPConfig | None = None
 
     def __post_init__(self):
         self.z_idxs = np.array(self.z_idxs)
@@ -357,7 +358,7 @@ class BACOSubsystem:
         z_bar,
         x_bar,
         y_bar,
-        optimizer: Union[str, Callable],
+        optimizer: str | Callable,
         acq_func: Callable,
         n_multistart: int = 10,
     ):
@@ -409,31 +410,29 @@ class BACOSubsystem:
 
         if n_multistart >= 4:
             start_results = Parallel(n_jobs=-1, backend="loky")(
-                (
-                    delayed(_run_one_start_subsystem)(
-                        x0,
-                        opt,
-                        acq_func,
-                        bounds,
-                        self.gp_J_i,
-                        self.gp_g_i,
-                        self.problem.constraints,
-                        self.best_J_i,
-                        self.problem.tol,
-                        _template_J_i.copy(),
-                        _template_g_i.copy(),
-                        (
-                            _j_i_off_z_bar,
-                            _j_i_off_x_bar_i,
-                            _j_i_off_y_bar_i,
-                            _j_i_off_y_bar_coupled,
-                            _j_i_off_z_under_i,
-                        ),
-                        nz,
-                        nx,
-                    )
-                    for x0 in start_points
+                delayed(_run_one_start_subsystem)(
+                    x0,
+                    opt,
+                    acq_func,
+                    bounds,
+                    self.gp_J_i,
+                    self.gp_g_i,
+                    self.problem.constraints,
+                    self.best_J_i,
+                    self.problem.tol,
+                    _template_J_i.copy(),
+                    _template_g_i.copy(),
+                    (
+                        _j_i_off_z_bar,
+                        _j_i_off_x_bar_i,
+                        _j_i_off_y_bar_i,
+                        _j_i_off_y_bar_coupled,
+                        _j_i_off_z_under_i,
+                    ),
+                    nz,
+                    nx,
                 )
+                for x0 in start_points
             )
         else:
             start_results = [
@@ -535,15 +534,15 @@ class BACOSystem:
     """System-level problem for BACO"""
 
     problem: Problem
-    subsystems: List[BACOSubsystem]
-    surrogate_config: Union[SMTGPConfig, TorchGPConfig, None] = None
+    subsystems: list[BACOSubsystem]
+    surrogate_config: SMTGPConfig | TorchGPConfig | None = None
 
     def __post_init__(self):
         if self.surrogate_config is None:
             from ..surrogates import SMTGPConfig
 
             self.surrogate_config = SMTGPConfig()
-        self.z = None
+        self.z_bar = None
         self.x_bar = None
         self.y_bar = None
         self.doe_sys = None
@@ -555,8 +554,12 @@ class BACOSystem:
 
     def initialize_doe(self, n_samples):
         """Initialize system DoE"""
-        if self.z is not None and self.x_bar is not None and (self.y_bar is not None):
-            x0 = np.concatenate([self.z, self.x_bar, self.y_bar])
+        if (
+            self.z_bar is not None
+            and self.x_bar is not None
+            and (self.y_bar is not None)
+        ):
+            x0 = np.concatenate([self.z_bar, self.x_bar, self.y_bar])
             f0, c0 = self.problem.evaluate(x0, f=True, c=True)
             c0_dict = {
                 const.func.name: c0[i]
@@ -574,8 +577,8 @@ class BACOSystem:
             self.doe_sys = self.problem.initial_DoE(n_samples)
         sample = self.doe_sys.x[0]
         nz = len(np.unique(np.concatenate([sub.z_idxs for sub in self.subsystems])))
-        nx = sum((len(sub.x_idxs) for sub in self.subsystems))
-        self.z = sample[:nz]
+        nx = sum(len(sub.x_idxs) for sub in self.subsystems)
+        self.z_bar = sample[:nz]
         self.x_bar = sample[nz : nz + nx]
         self.y_bar = sample[nz + nx :]
 
@@ -591,7 +594,7 @@ class BACOSystem:
 
     def solve_acquisition(
         self,
-        optimizer: Union[str, Callable],
+        optimizer: str | Callable,
         acq_func: Callable,
         f_min: float,
         n_multistart: int = 10,
@@ -617,7 +620,7 @@ class BACOSystem:
                 subsystem.surrogate_config,
                 i,
             ))
-        min_doe = min((t[1].x.shape[0] for t in fit_tasks))
+        min_doe = min(t[1].x.shape[0] for t in fit_tasks)
         use_loky = len(fit_tasks) >= 3 and min_doe >= 10
 
         def _fit_one(task_idx, kind, doe, y_key, config, tag):
@@ -640,7 +643,7 @@ class BACOSystem:
                 self.gp_c[tag] = gp
             elif kind == "gp_J_i":
                 self.subsystems[tag].gp_J_i = gp
-        nz = len(self.z)
+        nz = len(self.z_bar)
         nx = len(self.x_bar)
         _nsvars = nz + nx + len(self.y_bar)
         _subsystem_masks = []
@@ -674,7 +677,7 @@ class BACOSystem:
             f_min = self.doe_sys.get_f_min("obj", self.problem.tol)
         bounds = self.problem.bounds
         lhs_starts = LHS(xlimits=bounds, seed=42)(n_multistart - 1)
-        x0_default = np.concatenate([self.z, self.x_bar, self.y_bar])
+        x0_default = np.concatenate([self.z_bar, self.x_bar, self.y_bar])
         start_points = [x0_default] + [lhs_starts[i] for i in range(n_multistart - 1)]
         if isinstance(optimizer, str):
             opt = get_optimizer(optimizer)
@@ -683,23 +686,21 @@ class BACOSystem:
         gp_J_i_subsystems = [sub.gp_J_i for sub in self.subsystems]
         if n_multistart >= 4:
             start_results = Parallel(n_jobs=-1, backend="loky")(
-                (
-                    delayed(_run_one_start_system)(
-                        x0,
-                        opt,
-                        acq_func,
-                        bounds,
-                        self.gp_f,
-                        self.gp_c,
-                        gp_J_i_subsystems,
-                        _subsystem_masks,
-                        self.problem.constraints,
-                        epsilon_J,
-                        f_min,
-                        _nsvars,
-                    )
-                    for x0 in start_points
+                delayed(_run_one_start_system)(
+                    x0,
+                    opt,
+                    acq_func,
+                    bounds,
+                    self.gp_f,
+                    self.gp_c,
+                    gp_J_i_subsystems,
+                    _subsystem_masks,
+                    self.problem.constraints,
+                    epsilon_J,
+                    f_min,
+                    _nsvars,
                 )
+                for x0 in start_points
             )
         else:
             start_results = [
@@ -733,9 +734,9 @@ class BACOSystem:
             )
             best_result = x0_default
         best_result = clip_to_bounds(best_result, bounds)
-        nz = len(self.z)
+        nz = len(self.z_bar)
         nx = len(self.x_bar)
-        self.z = best_result[:nz]
+        self.z_bar = best_result[:nz]
         self.x_bar = best_result[nz : nz + nx]
         self.y_bar = best_result[nz + nx :]
         f_val, c_vals = self.problem.evaluate(best_result, f=True, c=True)
@@ -748,7 +749,7 @@ class BACOSystem:
         for i, const in enumerate(self.problem.constraints):
             y_dict[const.func.name] = c_vals[i]
         self.doe_sys.update_DoE(best_result, y_dict, h_total)
-        z_snap = self.z
+        z_snap = self.z_bar
         x_bar_snap = self.x_bar
         y_bar_snap = self.y_bar
 
@@ -790,7 +791,7 @@ class BACOSystem:
             yi_val = y_i.item() if y_i.size == 1 else y_i
             subsystem.doe_J_i.update_DoE(x_J_i_new, {"J_i": J_i_val, "y_i": yi_val})
         elapsed = time.time() - _start_time
-        return (self.z, self.x_bar, self.y_bar, elapsed, J_total)
+        return (self.z_bar, self.x_bar, self.y_bar, elapsed, J_total)
 
     def _describe_setup(self):
         return "\n".join([
@@ -805,10 +806,10 @@ class BayesianCollaborativeOptimization(BaseSolver):
     """BACO solver"""
 
     system: BACOSystem
-    subsystem_optimizer: Union[str, Callable]
-    system_optimizer: Union[str, Callable]
-    n_initial: Union[int, Callable, None] = None
-    acq_func: Union[Callable, None] = None
+    subsystem_optimizer: str | Callable
+    system_optimizer: str | Callable
+    n_initial: int | Callable | None = None
+    acq_func: Callable | None = None
     n_multistart: int = 10
     solver: str = "BACO"
 
@@ -860,21 +861,21 @@ class BayesianCollaborativeOptimization(BaseSolver):
         """Perform BACO-specific initialization (DoE generation)."""
         if isinstance(self.n_initial, Callable):
             n_init = self.n_initial(
-                len(self.system.z) + len(self.system.x_bar) + len(self.system.y_bar)
+                len(self.system.z_bar) + len(self.system.x_bar) + len(self.system.y_bar)
             )
         else:
             n_init = self.n_initial
         self.system.initialize_doe(n_init)
         for subsystem in self.system.subsystems:
             subsystem.initialize_doe(
-                self.n_initial, self.system.z, self.system.x_bar, self.system.y_bar
+                self.n_initial, self.system.z_bar, self.system.x_bar, self.system.y_bar
             )
 
     def iterate(self):
         """Execute one BACO iteration"""
         J_stars = []
         h_total = 0.0
-        z_bar = self.system.z
+        z_bar = self.system.z_bar
         x_bar = self.system.x_bar
         y_bar = self.system.y_bar
         gp_fit_tasks = []
@@ -889,7 +890,7 @@ class BayesianCollaborativeOptimization(BaseSolver):
                     subsystem.surrogate_config,
                 ))
                 task_map.append((idx, "g_i", const.func.name))
-        min_doe = min((t[0].x.shape[0] for t in gp_fit_tasks))
+        min_doe = min(t[0].x.shape[0] for t in gp_fit_tasks)
         use_loky = len(gp_fit_tasks) >= 3 and min_doe >= 10
         from joblib import Parallel, delayed
 
@@ -965,7 +966,7 @@ class BayesianCollaborativeOptimization(BaseSolver):
         self._history["f_sys"].append(f_sys)
         self._history["h_total"].append(h_total)
         self._history["J_total"].append(J_total)
-        self._history["z"].append(self.system.z.copy())
+        self._history["z"].append(self.system.z_bar.copy())
         self._history["x"].append(self.system.x_bar.copy())
         self._history["y"].append(self.system.y_bar.copy())
         for idx, _ in enumerate(self.system.subsystems):
@@ -1001,9 +1002,9 @@ class BayesianCollaborativeOptimization(BaseSolver):
         self._converged = False
         self._iter = 0
         self._eval = len(self.system.doe_sys.x) * len(self.system.subsystems) + sum(
-            (len(sub.doe_J_i.x) for sub in self.system.subsystems)
+            len(sub.doe_J_i.x) for sub in self.system.subsystems
         )
-        nz = len(self.system.z)
+        nz = len(self.system.z_bar)
         nx = len(self.system.x_bar)
         doe = self.system.doe_sys
         cv = doe.constraint_violation
@@ -1070,10 +1071,10 @@ class BayesianCollaborativeOptimization(BaseSolver):
             J_i_vals = subsystem.doe_J_i.y["J_i"]
             yi_vals = subsystem.doe_J_i.y["y_i"]
             hi_vals = subsystem.doe_J_i.constraint_violation
-            nz_bar = len(self.system.z)
+            nz_bar = len(self.system.z_bar)
             nx_bar_i = len(subsystem.x_idxs)
             ny_bar_i = len(subsystem.y_idxs)
-            ny_coupled = sum((len(c) for c in subsystem.y_coupled_idxs))
+            ny_coupled = sum(len(c) for c in subsystem.y_coupled_idxs)
             offset = nz_bar + nx_bar_i + ny_bar_i + ny_coupled
             nz_ss = len(subsystem.z_idxs)
             nx_ss = len(subsystem.x_idxs)
@@ -1132,7 +1133,7 @@ class BayesianCollaborativeOptimization(BaseSolver):
             J_total = self._history["J_total"][-1]
             h_total = self._history["h_total"][-1]
             improved = self._best_results.update(
-                z_new=self.system.z,
+                z_new=self.system.z_bar,
                 x_new=self.system.x_bar,
                 y_new=self.system.y_bar,
                 f_new=f_sys,
@@ -1148,7 +1149,7 @@ class BayesianCollaborativeOptimization(BaseSolver):
                 f=f_sys,
                 h_total=h_total,
                 J_total=J_total,
-                z=self.system.z.copy(),
+                z=self.system.z_bar.copy(),
                 x=self.system.x_bar.copy(),
                 y=self.system.y_bar.copy(),
             )

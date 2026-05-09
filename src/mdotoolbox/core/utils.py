@@ -19,7 +19,7 @@ import typeguard
 
 
 def type_check(obg, typ) -> bool:
-    """Check if object matches given type or Union of types."""
+    """Check if object matches given type(s)."""
     try:
         typeguard.check_type(obg, typ)
         return True
@@ -37,7 +37,7 @@ def is_valid_matrix(obj) -> bool:
         return False
     if not obj:
         return False
-    if not all((type_check(row, (list, np.ndarray)) for row in obj)):
+    if not all(type_check(row, (list, np.ndarray)) for row in obj):
         return False
     first_row_length = len(obj[0])
     for row in obj:
@@ -143,15 +143,15 @@ def format_time_multi(*durations):
     for td in durations:
         parts = tokenize_time(*decompose_seconds(td))
         token_rows.append(parts)
-    max_cols = max((len(row) for row in token_rows))
+    max_cols = max(len(row) for row in token_rows)
     for row in token_rows:
         row[:0] = [""] * (max_cols - len(row))
     col_widths = []
     for col in range(max_cols):
-        col_widths.append(max((len(row[col]) for row in token_rows)))
+        col_widths.append(max(len(row[col]) for row in token_rows))
     result = []
     for row in token_rows:
-        aligned = " ".join((row[col].rjust(col_widths[col]) for col in range(max_cols)))
+        aligned = " ".join(row[col].rjust(col_widths[col]) for col in range(max_cols))
         result.append(aligned)
     return result
 

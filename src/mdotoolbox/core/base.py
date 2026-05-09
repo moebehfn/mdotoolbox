@@ -16,8 +16,9 @@ from __future__ import annotations
 
 "\nsrc/mdotoolbox/core/base.py\n\nDefines baseline objects for the library.\n"
 import warnings  # noqa: E402
+from collections.abc import Callable, Iterable  # noqa: E402
 from dataclasses import dataclass, field  # noqa: E402
-from typing import TYPE_CHECKING, Callable, Iterable, List, Literal, Union  # noqa: E402
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np  # noqa: E402
 import numpy.typing as npt  # noqa: E402
@@ -33,35 +34,35 @@ from .utils import (  # noqa: E402
     type_check,
 )
 
-PyScalar = Union[int, float, bool]
-NumPyScalar = Union[np.bool_, np.integer, np.floating]
-ScalarLike = Union[
-    PyScalar,
-    Float[np.ndarray, ""],  # noqa: F722
-    Int[np.ndarray, ""],  # noqa: F722
-    Bool[np.ndarray, ""],  # noqa: F722
-]
-ArrayLike = Union[
-    list[PyScalar],
-    Float[np.ndarray, "N"],  # noqa: F821
-    Int[np.ndarray, "N"],  # noqa: F821
-    Bool[np.ndarray, "N"],  # noqa: F821
-]
-MatrixLike = Union[
-    list[list[PyScalar]],
-    Float[np.ndarray, "H W"],  # noqa: F722
-    Int[np.ndarray, "H W"],  # noqa: F722
-    Bool[np.ndarray, "H W"],  # noqa: F722
-]
+PyScalar = int | float | bool
+NumPyScalar = np.bool_ | np.integer | np.floating
+ScalarLike = (
+    PyScalar
+    | Float[np.ndarray, ""]  # noqa: F722
+    | Int[np.ndarray, ""]  # noqa: F722
+    | Bool[np.ndarray, ""]  # noqa: F722
+)
+ArrayLike = (
+    list[PyScalar]
+    | Float[np.ndarray, "N"]  # noqa: F821
+    | Int[np.ndarray, "N"]  # noqa: F821
+    | Bool[np.ndarray, "N"]  # noqa: F821
+)
+MatrixLike = (
+    list[list[PyScalar]]
+    | Float[np.ndarray, "H W"]  # noqa: F722
+    | Int[np.ndarray, "H W"]  # noqa: F722
+    | Bool[np.ndarray, "H W"]  # noqa: F722
+)
 
 
 @dataclass
 class DoE:
     """Design of Experiments (DoE) container for storing sampling data."""
 
-    x: Union[list, np.ndarray]
-    y: Union[dict, list, np.ndarray]
-    constraint_violation: Union[np.ndarray, None] = None
+    x: list | np.ndarray
+    y: dict | list | np.ndarray
+    constraint_violation: np.ndarray | None = None
 
     def __post_init__(self):
         """Validate and normalize data after initialization."""
@@ -69,7 +70,7 @@ class DoE:
             first_key = list(self.y.keys())[0]
             n_outputs = len(self.y[first_key])
             for key, val in self.y.items():
-                if not type_check(val, Union[ArrayLike, MatrixLike]):
+                if not type_check(val, ArrayLike | MatrixLike):
                     raise TypeError(
                         f"y['{key}'] must be an ArrayLike or a MatrixLike object."
                     )
@@ -115,9 +116,9 @@ class DoE:
 
     def update_DoE(
         self,
-        x_n: Union[ArrayLike, ScalarLike],
-        y_n: Union[ArrayLike, ScalarLike],
-        constraint_violation_n: Union[float, None] = None,
+        x_n: ArrayLike | ScalarLike,
+        y_n: ArrayLike | ScalarLike,
+        constraint_violation_n: float | None = None,
         tol: float = 1e-10,
         drop_duplicates: bool = True,
     ):
@@ -132,7 +133,7 @@ class DoE:
                     f"y_n keys {set(y_n.keys())} must match existing keys {set(self.y.keys())}"
                 )
             for key, val in y_n.items():
-                if not type_check(val, Union[ArrayLike, ScalarLike]):
+                if not type_check(val, ArrayLike | ScalarLike):
                     raise TypeError(
                         f"y_n['{key}'] must be a ScalarLike or an ArrayLike object."
                     )
@@ -143,7 +144,7 @@ class DoE:
             raise ValueError(
                 f"DoE has multiple outputs {list(self.y.keys())}, y_n must be a dictionary"
             )
-        if not type_check(x_n, Union[ArrayLike, ScalarLike]):
+        if not type_check(x_n, ArrayLike | ScalarLike):
             raise TypeError("x_n must be a ScalarLike or an ArrayLike object.")
         x_n = np.array([x_n]).ravel()
         x_0 = np.array([self.x[0]]).ravel()
@@ -238,13 +239,13 @@ class Function:
     """Callable function wrapper for optimization problems."""
 
     func: Callable
-    x: Union[str, List[str], np.typing.NDArray[str]]
+    x: str | list[str] | np.typing.NDArray[str]
     name: str = ""
 
     def __post_init__(self):
         if not type_check(self.func, Callable):
             raise TypeError("func must be a callable function.")
-        if not type_check(self.x, Union[str, List[str], np.typing.NDArray[str]]):
+        if not type_check(self.x, str | list[str] | np.typing.NDArray[str]):
             raise TypeError(
                 "x is a vector therefore x_str must be a list-like of strings"
             )
@@ -269,14 +270,14 @@ class Constraint:
 
     func: Function
     ctype: str = "ge"
-    value: Union[int, float] = 0.0
+    value: int | float = 0.0
 
     def __post_init__(self):
         if not type_check(self.func, Function):
             raise TypeError("func must be a Function object.")
         if not type_check(self.ctype, str):
             raise TypeError("ctype must be a string.")
-        if not type_check(self.value, Union[int, float]):
+        if not type_check(self.value, int | float):
             raise TypeError("value must be int or float.")
         if self.ctype not in ["ge", "le", "eq"]:
             raise ValueError(
@@ -542,11 +543,9 @@ def update_pareto(
     for s, key_a, key_b in _SPACES:
         a = (candidate[key_a], candidate[key_b])
         dominated = any(
-            (
-                _dominates((e.metric(key_a), e.metric(key_b)), a)
-                for e in pareto_set
-                if e.code // s % 2 == 1
-            )
+            _dominates((e.metric(key_a), e.metric(key_b)), a)
+            for e in pareto_set
+            if e.code // s % 2 == 1
         )
         if not dominated:
             code += s
@@ -714,8 +713,8 @@ class Results:
     iterations: int = None
     evaluations: int = None
     elapsed_time: float = None
-    history: "pd.DataFrame" | None = None
-    pareto: "pd.DataFrame" = field(
+    history: pd.DataFrame | None = None
+    pareto: pd.DataFrame = field(
         default_factory=lambda: __import__("pandas").DataFrame(columns=PARETO_COLUMNS)
     )
 
@@ -804,9 +803,9 @@ class BudgetManager:
     mode: Literal["shared", "weighted", "fixed"] = "weighted"
     total_budget: int = None
     system_ratio: float = 0.5
-    subsystem_weights: List[float] = None
+    subsystem_weights: list[float] = None
     iteration_ratio: float = 0.05
-    subsystem_budgets: List[int] = None
+    subsystem_budgets: list[int] = None
     system_budget: int = None
 
     def __post_init__(self):

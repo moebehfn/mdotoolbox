@@ -15,8 +15,8 @@
 """src/mdotoolbox/frameworks/ico.py"""
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Union
 
 import numpy as np
 
@@ -118,13 +118,13 @@ class ImprovedCollaborativeOptimization(BaseSolver):
     """Improved Collaborative Optimization solver with dynamic penalty."""
 
     system: ICOSystem
-    subsystem_optimizer: Union[str, Callable]
-    system_optimizer: Union[str, Callable]
+    subsystem_optimizer: str | Callable
+    system_optimizer: str | Callable
     epsilon_J: float = 1e-06
     epsilon_h: float = 1e-06
-    budget: Union["BudgetManager", int] = 100
-    max_iter: Union[int, None] = None
-    max_eval: Union[int, None] = None
+    budget: BudgetManager | int = 100
+    max_iter: int | None = None
+    max_eval: int | None = None
     gamma: float = 1.0
     relaxation_radius: float = 0.0
     delta: float = 1.1

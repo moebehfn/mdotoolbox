@@ -14,8 +14,8 @@
 
 """src/mdotoolbox/frameworks/eco.py"""
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Union
 
 import numpy as np
 
@@ -91,13 +91,13 @@ class EnhancedCollaborativeOptimization(BaseSolver):
     """Enhanced Collaborative Optimization solver with relaxation parameter alpha."""
 
     system: ECOSystem
-    subsystem_optimizer: Union[str, Callable]
-    system_optimizer: Union[str, Callable]
+    subsystem_optimizer: str | Callable
+    system_optimizer: str | Callable
     epsilon_J: float = 1e-06
     epsilon_h: float = 1e-06
-    budget: Union["BudgetManager", int] = 100
-    max_iter: Union[int, None] = None
-    max_eval: Union[int, None] = None
+    budget: BudgetManager | int = 100
+    max_iter: int | None = None
+    max_eval: int | None = None
     alpha_initial: float = 10.0
     alpha_final: float = 1e-06
     alpha_schedule: str = "geometric"

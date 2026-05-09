@@ -19,7 +19,7 @@ import time
 from abc import ABC
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, List, Optional, Union
+from typing import TYPE_CHECKING, Callable, List, Optional
 
 import numpy as np
 
@@ -174,7 +174,7 @@ class BaseSubsystem(ABC):
         z_bar,
         x_bar,
         y_bar,
-        optimizer: Union[str, Callable],
+        optimizer: str | Callable,
         system_iter: int,
         global_start_time: float,
         maxiter: int = None,
@@ -396,7 +396,7 @@ class BaseSystem(ABC):
 
     def solve(
         self,
-        optimizer: Union[str, Callable],
+        optimizer: str | Callable,
         system_iter: int,
         global_start_time: float,
         maxiter: int = None,
@@ -466,14 +466,14 @@ class BaseSolver(ABC):
     """Base solver for all CO framework variants."""
 
     system: BaseSystem
-    subsystem_optimizer: Union[str, Callable]
-    system_optimizer: Union[str, Callable]
+    subsystem_optimizer: str | Callable
+    system_optimizer: str | Callable
     epsilon_J: float = 1e-06
     epsilon_h: float = 1e-06
     budget: BudgetManager | int = 100
-    max_iter: Union[int, None] = None
-    max_eval: Union[int, None] = None
-    cache_dir: Optional[Path] = None
+    max_iter: int | None = None
+    max_eval: int | None = None
+    cache_dir: Path | None = None
     name: str = "Optimization Problem"
     solver: str = "CO"
 
