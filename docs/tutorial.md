@@ -8,9 +8,9 @@ This guide provides a detailed, step-by-step walkthrough for defining a Multi-Di
 
 Before writing code, identify the three types of variables in your MDO problem:
 
-1.  **Shared Variables ($z$):** Design variables that are inputs to multiple disciplines (e.g., altitude, Mach number).
-2.  **Local Variables ($x_i$):** Design variables that are inputs to only one specific discipline $i$ (e.g., wing thickness for aerodynamics).
-3.  **Coupling Variables ($y$):** Outputs from one discipline that serve as inputs to another (e.g., aerodynamic loads acting on the structure).
+1. **Shared Variables ($z$):** Design variables that are inputs to multiple disciplines (e.g., altitude, Mach number).
+2. **Local Variables ($x_i$):** Design variables that are inputs to only one specific discipline $i$ (e.g., wing thickness for aerodynamics).
+3. **Coupling Variables ($y$):** Outputs from one discipline that serve as inputs to another (e.g., aerodynamic loads acting on the structure).
 
 ---
 
@@ -19,6 +19,7 @@ Before writing code, identify the three types of variables in your MDO problem:
 Every problem is built using `Function`, `Constraint`, and `Problem` objects from `mdotoolbox.core`.
 
 ### A. Define the Mathematical Functions
+
 Functions must be Python callables (or JIT-compiled with `@njit`) that accept individual scalar arguments.
 
 ```python
@@ -42,6 +43,7 @@ def system_obj_func(z1, z2, x1, y1, y2):
 ```
 
 ### B. Wrap in `Function` Objects
+
 The `Function` object maps your Python function to specific variable names.
 
 ```python
@@ -58,6 +60,7 @@ f_sys = Function(
 ```
 
 ### C. Define Constraints
+
 Constraints wrap a `Function` with a comparison type (`ge` for $\ge$, `le` for $\le$, `eq` for $=$) and a reference value.
 
 ```python
@@ -78,6 +81,7 @@ c_sys1 = Constraint(
 ## 3. Assembling the Hierarchical Structure
 
 ### Step 1: Create Subsystem Problems
+
 Each discipline needs its own `Problem` object. For CO/BACO, the **objective** of a subsystem problem is the function that computes its **coupling outputs**.
 
 ```python
@@ -101,12 +105,13 @@ sub2_prob = Problem(
 ```
 
 ### Step 2: Define Index Mappings
+
 You must tell the framework how variables in the global vectors ($z, x, y$) map to each subsystem.
 
-*   `z_idxs`: Indices in the shared variable vector $z$.
-*   `x_idxs`: Indices in the **local** variable vector $x$.
-*   `y_idxs`: Indices in the **coupling** variable vector $y$ that this subsystem **produces**.
-*   `y_coupled_idxs`: A list of arrays. Each array contains indices in $y$ that this subsystem **receives** as input.
+* `z_idxs`: Indices in the shared variable vector $z$.
+* `x_idxs`: Indices in the **local** variable vector $x$.
+* `y_idxs`: Indices in the **coupling** variable vector $y$ that this subsystem **produces**.
+* `y_coupled_idxs`: A list of arrays. Each array contains indices in $y$ that this subsystem **receives** as input.
 
 ```python
 # Subsystem 1 Mappings

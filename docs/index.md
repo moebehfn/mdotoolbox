@@ -4,18 +4,17 @@
 
 MDOToolbox is a Python library for solving multi-disciplinary optimization (MDO) problems using hierarchical decomposition and Bayesian optimization. It provides five optimization frameworks, Gaussian Process surrogates, and a suite of built-in benchmark problems for rapid prototyping and research.
 
-## Cite us
+## Cite us (preprint)
 
 ```bibtex
-@inproceedings{baco2026,
-    author      = {Belhafnaoui, Mohamed Ali and Diouane, Youssef},
-    title       = {{A Bayesian Algorithm for Collaborative Optimization with Application to Aircraft Design}},
-    booktitle   = {{AIAA Aviation 2026}},
-    year        = {2026},
-    address     = {San-Diego, California},
-    month       = jun,
-    publisher   = {American Institute of Aeronautics and Astronautics},
-    % doi         = {xxx} 
+@misc{baco2026,
+      title         = {Bayesian Algorithm for Collaborative Optimization with Application to Aircraft Design}, 
+      author        = {Mohamed Ali Belhafnaoui and Youssef Diouane},
+      year          = {2026},
+      eprint        = {2605.05474},
+      archivePrefix = {arXiv},
+      primaryClass  = {math.OC},
+      url           = {https://arxiv.org/abs/2605.05474}, 
 }
 ```
 
@@ -111,7 +110,7 @@ All benchmark functions return a dictionary with `system_problem` and `subsystem
 
 ## Project Structure
 
-```
+```text
 src/mdotoolbox/
 ├── core/           # Base classes (Problem, Function, Constraint, DoE)
 ├── frameworks/     # CO, BACO, ICO, MCO, ECO implementations

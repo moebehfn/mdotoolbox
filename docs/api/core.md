@@ -6,18 +6,19 @@ Extracted documentation from `src/mdotoolbox/core/base.py`.
 
 ### Attributes
 
-x (Union[list, np.ndarray]): Input samples as a matrix (n_samples x n_vars)
-        or vector (for 1D problems). Each row represents one sample point.
-    y (Union[dict, list, np.ndarray]): Output evaluations. Can be:
+    x (list| np.ndarray): Input samples as a matrix (n_samples x n_vars)
+            or vector (for 1D problems). Each row represents one sample point.
+    y (dict| list, np.ndarray): Output evaluations. Can be:
         - dict: Multiple outputs with named keys {name: array of values}
         - list/array: Single output (converted to dict with key 'y')
-    constraint_violation (Union[np.ndarray, None]): Optional array of constraint
+    constraint_violation (np.ndarray| None): Optional array of constraint
         violation values for each sample. None indicates no constraints or
         all points are feasible. Default is None.
 
 ### Examples
 
->>> # Single output
+    >>> # Single output
+
     >>> doe = DoE(x=[[1, 2], [3, 4]], y=[0.5, 1.2])
     >>>
     >>> # Multiple outputs with constraints
@@ -27,15 +28,15 @@ x (Union[list, np.ndarray]): Input samples as a matrix (n_samples x n_vars)
     ...     constraint_violation=[0.0, 0.2]
     ... )
 
-Raises:
-    TypeError: If x or y are not of the correct type.
-    ValueError: If dimensions of x, y, and constraint_violation don't match.
+    Raises:
+        TypeError: If x or y are not of the correct type.
+        ValueError: If dimensions of x, y, and constraint_violation don't match.
 
 ## update_DoE
 
 ### Examples
 
->>> doe = DoE(x=[[1, 2]], y=[0.5])
+    >>> doe = DoE(x=[[1, 2]], y=[0.5])
     >>> doe.update_DoE(x_n=[3, 4], y_n=1.2)
     >>> print(len(doe.x))  # Now has 2 samples
     2
@@ -44,7 +45,7 @@ Raises:
 
 ### Examples
 
->>> doe = DoE(x=[[1, 2]], y={'obj': [0.5]}, constraint_violation=[0.1])
+    >>> doe = DoE(x=[[1, 2]], y={'obj': [0.5]}, constraint_violation=[0.1])
     >>> data = doe.to_dict()
     >>> print(data.keys())
     dict_keys(['x', 'obj', 'constraint_violation'])
@@ -53,7 +54,7 @@ Raises:
 
 ### Examples
 
->>> doe = DoE(x=[[1], [2], [3]], y=[1, 2, 3],
+    >>> doe = DoE(x=[[1], [2], [3]], y=[1, 2, 3],
     ...           constraint_violation=[0, 0.1, 0.0001])
     >>> feasible_idx = doe.get_feasible_indices(tol=0.01)
     >>> print(feasible_idx)  # Points 0 and 2
@@ -63,7 +64,7 @@ Raises:
 
 ### Examples
 
->>> doe = DoE(
+    >>> doe = DoE(
     ...     x=[[1], [2], [3]],
     ...     y={'obj': [10, 5, 8]},
     ...     constraint_violation=[0.5, 0.0, 0.1]
@@ -76,7 +77,7 @@ Raises:
 
 ### Examples
 
->>> doe = DoE(x=[[1], [2]], y={'obj': [10, 5]})
+    >>> doe = DoE(x=[[1], [2]], y={'obj': [10, 5]})
     >>> f_min = doe.get_f_min()
     >>> print(f_min)
     5
@@ -85,16 +86,17 @@ Raises:
 
 ### Attributes
 
-func (Callable): The actual function to evaluate. Should accept
+    func (Callable): The actual function to evaluate. Should accept
         individual arguments matching the variable names in x.
-    x (Union[str, List[str], np.ndarray[str]]): Variable names that the
+    x (Union[str, list[str], np.ndarray[str]]): Variable names that the
         function depends on. Can be a single variable name or a list of names.
     name (str, optional): Descriptive name for the function (e.g., "drag",
         "lift", "constraint_1"). Defaults to empty string.
 
 ### Examples
 
->>> # Simple quadratic function
+    >>> # Simple quadratic function
+
     >>> def quad(x, y):
     ...     return x**2 + y**2
     >>> f = Function(func=quad, x=['x', 'y'], name='quadratic')
@@ -104,19 +106,19 @@ func (Callable): The actual function to evaluate. Should accept
     ...     return x - 5
     >>> c = Function(func=constraint, x='x', name='lower_bound')
 
-Raises:
-    TypeError: If func is not callable, x is not string-like, or name is not a string.
+    Raises:
+        TypeError: If func is not callable, x is not string-like, or name is not a string.
 
 ### Notes
 
 The function is called with positional arguments in the order specified by x.
-    For example, if x=['a', 'b', 'c'], func will be called as func(a_val, b_val, c_val).
+For example, if x=['a', 'b', 'c'], func will be called as func(a_val, b_val, c_val).
 
 ## Constraint
 
 ### Attributes
 
-func (Function): The constraint function wrapped in a Function object.
+    func (Function): The constraint function wrapped in a Function object.
     ctype (str, optional): Constraint type. Must be one of:
         - 'ge': Greater than or equal (func(x) >= value)
         - 'le': Less than or equal (func(x) <= value)
@@ -127,7 +129,8 @@ func (Function): The constraint function wrapped in a Function object.
 
 ### Examples
 
->>> # Box constraint: x >= 0
+    >>> # Box constraint: x >= 0
+
     >>> def x_func(x):
     ...     return x
     >>> f = Function(func=x_func, x='x', name='x_value')
@@ -139,22 +142,21 @@ func (Function): The constraint function wrapped in a Function object.
     >>> f = Function(func=circle, x=['x', 'y'], name='circle')
     >>> c = Constraint(func=f, ctype='le', value=1.0)
 
-Raises:
-    TypeError: If func is not a Function object, ctype is not a string,
-        or value is not numeric.
-    ValueError: If ctype is not one of 'ge', 'le', or 'eq'.
+    Raises:
+        TypeError: If func is not a Function object, ctype is not a string,
+            or value is not numeric.
+        ValueError: If ctype is not one of 'ge', 'le', or 'eq'.
 
 ### Notes
 
 - Internally, constraints are converted to the form func(x) OP value
-    - For inequality constraints, violation is measured as the amount by
-      which the constraint is not satisfied
+- For inequality constraints, violation is measured as the amount by which the constraint is not satisfied
 
 ## Problem
 
 ### Attributes
 
-objective (Function): Objective function to minimize (or maximize if
+    objective (Function): Objective function to minimize (or maximize if
         maximize=True).
     constraints (Iterable): Collection of Constraint objects defining the
         feasible region. Can be empty for unconstrained problems.
@@ -170,7 +172,8 @@ objective (Function): Objective function to minimize (or maximize if
 
 ### Examples
 
->>> # Unconstrained problem: minimize (x-2)^2
+    >>> # Unconstrained problem: minimize (x-2)^2
+
     >>> def obj(x):
     ...     return (x - 2)**2
     >>> f = Function(func=obj, x='x', name='quadratic')
@@ -196,22 +199,23 @@ objective (Function): Objective function to minimize (or maximize if
     ...     ubounds=[10, 10]
     ... )
 
-Raises:
-    TypeError: If inputs are not of the correct type.
-    ValueError: If bounds length doesn't match number of variables or
-        constraint variables don't match objective variables.
+    Raises:
+        TypeError: If inputs are not of the correct type.
+        ValueError: If bounds length doesn't match number of variables or
+            constraint variables don't match objective variables.
 
 ### Notes
 
 - If maximize=True, the objective is internally negated for minimization
-    - Bounds are stored as self.bounds (n_vars x 2) array
-    - Constraint names are auto-generated if not provided
+- Bounds are stored as self.bounds (n_vars x 2) array
+- Constraint names are auto-generated if not provided
 
 ## evaluate
 
 ### Examples
 
->>> # Evaluate objective only
+    >>> # Evaluate objective only
+
     >>> f_val, _ = problem.evaluate(x=[1.0, 2.0], f=True, c=False)
     >>>
     >>> # Evaluate constraints only
@@ -228,7 +232,8 @@ The objective is called with unpacked x values as positional arguments.
 
 ### Examples
 
->>> # Fixed number of samples
+    >>> # Fixed number of samples
+
     >>> doe = problem.initial_DoE(n=20)
     >>>
     >>> # Adaptive number based on problem dimension
@@ -237,14 +242,15 @@ The objective is called with unpacked x values as positional arguments.
 ### Notes
 
 - For infinite bounds, uses +/-100 or +/-(bound + 50) as limits
-    - Evaluates objective as 'obj' and constraints as 'c{i}-{type}-{value}'
-    - Automatically computes constraint violations
+- Evaluates objective as 'obj' and constraints as 'c{i}-{type}-{value}'
+- Automatically computes constraint violations
 
 ## compute_constraint_violation
 
 ### Examples
 
->>> # For constraints c1(x) >= 0 and c2(x) <= 5
+    >>> # For constraints c1(x) >= 0 and c2(x) <= 5
+
     >>> constraint_vals = {
     ...     'c0-ge-0.0': np.array([1.0, -0.5, 0.1]),  # c1 values
     ...     'c1-le-5.0': np.array([3.0, 6.0, 4.9])    # c2 values
@@ -255,28 +261,28 @@ The objective is called with unpacked x values as positional arguments.
 ### Notes
 
 - For 'ge' constraints: violation = max(0, value - c_val)^2
-    - For 'le' constraints: violation = max(0, c_val - value)^2
-    - For 'eq' constraints: violation = |c_val - value|^2
-    - Total violation is the sum across all constraints
+  - For 'le' constraints: violation = max(0, c_val - value)^2
+  - For 'eq' constraints: violation = |c_val - value|^2
+  - Total violation is the sum across all constraints
 
 ## ParetoEntry
 
 ### Attributes
 
-f:    Objective value.
-    h:    Total constraint violation h_total.
-    J_i:  Total coupling discrepancy J_i.
+    f:     Objective value.
+    h:     Total constraint violation h_total.
+    J_i:   Total coupling discrepancy J_i.
     z_bar: Shared design variables at this iterate.
     x_bar: Local design variables at this iterate.
     y_bar: Coupling variables at this iterate.
-    code: Integer in {1,...,7}. Bit 1 set if non-dominated in (f,h);
-          bit 2 if non-dominated in (f,J); bit 4 if non-dominated in (h,J).
+    code:  Integer in {1,...,7}. Bit 1 set if non-dominated in (f,h);
+           bit 2 if non-dominated in (f,J); bit 4 if non-dominated in (h,J).
 
 ## BestSolution
 
 ### Attributes
 
-z_bar:     Shared design variables at the best iterate.
+    z_bar:     Shared design variables at the best iterate.
     x_bar:     Local design variables at the best iterate.
     y_bar:     Coupling variables at the best iterate.
     f:         Objective value at the best iterate.
@@ -288,7 +294,7 @@ z_bar:     Shared design variables at the best iterate.
 
 ### Attributes
 
-best:         Best iterate found under the lexicographic criterion.
+    best:         Best iterate found under the lexicographic criterion.
     converged:    True if termination criteria were met.
     iterations:   Number of system-level iterations performed.
     evaluations:  Total number of discipline evaluations performed.
@@ -303,7 +309,7 @@ best:         Best iterate found under the lexicographic criterion.
 
 ### Attributes
 
-mode (Literal["shared", "weighted", "fixed"]): Budget allocation strategy:
+    mode (Literal["shared", "weighted", "fixed"]): Budget allocation strategy:
         - "shared": Single shared pool, first-come-first-served
         - "weighted": Proportional split based on ratios
         - "fixed": User-specified exact allocations
@@ -312,9 +318,9 @@ mode (Literal["shared", "weighted", "fixed"]): Budget allocation strategy:
         "shared" and "weighted" modes.
     system_ratio (float, optional): Fraction of budget for system-level
         (weighted mode only). Must be in (0, 1). Defaults to 0.5.
-    subsystem_weights (List[float], optional): Relative weights for each
+    subsystem_weights (list[float], optional): Relative weights for each
         subsystem (weighted mode). Must sum to ~1.0.
-    subsystem_budgets (List[int], optional): Exact budgets for each
+    subsystem_budgets (list[int], optional): Exact budgets for each
         subsystem (fixed mode). Required if mode="fixed".
     system_budget (int, optional): Exact budget for system-level (fixed mode).
         Required if mode="fixed".
@@ -324,7 +330,8 @@ mode (Literal["shared", "weighted", "fixed"]): Budget allocation strategy:
 
 ### Examples
 
->>> # Mode 1: Shared pool (400 total, use until exhausted)
+    >>> # Mode 1: Shared pool (400 total, use until exhausted)
+
     >>> budget = BudgetManager(mode="shared", total_budget=400)
     >>>
     >>> # Mode 2: Weighted split (50% system, 50% subsystems)
@@ -355,13 +362,12 @@ mode (Literal["shared", "weighted", "fixed"]): Budget allocation strategy:
 ### Notes
 
 - Call initialize(n_subsystems) before using the budget manager
-    - Use get_subsystem_max_iter() and get_system_max_iter() to get
-      available evaluations for each call
-    - Record actual usage with record_subsystem_evals() and record_system_evals()
-    - Check exhaustion with is_subsystem_exhausted(), is_system_exhausted(),
-      is_total_exhausted()
+- Use get_subsystem_max_iter() and get_system_max_iter() to get
+    available evaluations for each call
+- Record actual usage with record_subsystem_evals() and record_system_evals()
+- Check exhaustion with is_subsystem_exhausted(), is_system_exhausted(),
+    is_total_exhausted()
 
-Raises:
-    ValueError: If mode is invalid, weights don't sum to 1, or required
-        parameters are missing for the selected mode.
-
+        Raises:
+            ValueError: If mode is invalid, weights don't sum to 1, or required
+                parameters are missing for the selected mode.

@@ -1,140 +1,136 @@
-# BACO Framework
+# Bayesian Algorithm for Collaborative Optimization Framework
 
-Extracted documentation from `src/mdotoolbox/frameworks/baco.py`.
+## Mathematical Formulation
 
-## Overview
+System Level:
+
+$$
+\begin{align*}
+    &\max_{
+        \overline{\bm{z}},
+        \overline{\bm{x}},
+        \overline{\bm{y}}
+    }\quad && \alpha_f(
+        \overline{\bm{z}},
+        \overline{\bm{x}},
+        \overline{\bm{y}}
+    ) \tag{\(\widetilde{P}_\text{sys}\)} \\
+    &\text{subject to:}\quad
+    &&\bm{\mu_c}(
+        \overline{\bm{z}},
+        \overline{\bm{x}},
+        \overline{\bm{y}},
+    ) &&\geq \bm{0}\\
+    %
+    &  && \mu_{J_i}(
+        \overline{\bm{z}},
+        \overline{\bm{x}}_i,
+        \overline{\bm{y}},
+        \underline{\bm{z}}_i^*,
+        \underline{\bm{x}}_i^*
+    ) &&= 0\qquad \text{for all}\quad i\in\{1\cdots N\}
+\end{align*}
+$$
+
+Subsystem $i$ level:
+
+$$
+\begin{equation*}
+    \max_{
+        \underline{\bm{z}}_i,
+        \underline{\bm{x}}_i
+    }\quad \alpha_{J_i}(
+        \overline{\bm{z}},
+        \overline{\bm{x}}_i,
+        \overline{\bm{y}},
+        \underline{\bm{z}}_i,
+        \underline{\bm{x}}_i
+    ) \tag{\(\widetilde{P}_i\)}\quad
+    \text{subject to:}\quad
+    \bm{\mu}_{\bm{g}_i}(
+        \overline{\bm{y}}_{j\neq i},
+        \underline{\bm{z}}_i,
+        \underline{\bm{x}}_i
+    )\geq\bm{0}
+\end{equation*}
+$$
+
+The discrepancy function:
+
+$$
+\begin{equation*}
+    J(
+        \overline{\bm{z}},
+        \overline{\bm{x}}_i,
+        \overline{\bm{y}},
+        \underline{\bm{z}}_i,
+        \underline{\bm{x}}_i
+    ) = J_i =
+        \bigl\|\overline{\bm{z}}-\underline{\bm{z}}_i\bigr\|^2 +
+        \bigl\|\overline{\bm{x}}_i-\underline{\bm{x}}_i\bigr\|^2 +
+        \bigl\|\overline{\bm{y}}_i-\bm{y}_i\bigl(
+        \overline{\bm{y}}_{j\neq i},
+        \underline{\bm{z}}_i,
+        \underline{\bm{x}}_i
+    \bigr)\bigr\|^2
+\end{equation*}
+$$
 
 ### Key Innovations
 
 - GP surrogates for subsystem objectives (J_i) and constraints (g_i)
-    - Acquisition function optimization (Expected Improvement)
-    - Latin Hypercube Sampling for efficient DoE initialization
-    - Reduced subsystem evaluations through surrogate modeling
-
-### Mathematical Formulation
-
-System Level: (same as CO)
-        min_{z,x_bar,y_bar} f(z, x_bar, y_bar)
-        s.t.  g_sys(z, x_bar, y_bar) >= 0
-              J_i <= epsilon  for all i
-
-    Subsystem Level i: (Bayesian optimization)
-        - Build GP surrogates: mu_{J_i}(z_under_i, x_under_i), mu_{g_i}(z_under_i, x_under_i)
-        - Optimize acquisition: max alpha_{EI}[mu_{J_i}] s.t. mu_{g_i} >= 0
-        - Update DoE with new evaluation
-        - Retrain surrogates
+  - Acquisition function optimization (Expected Improvement)
+  - Latin Hypercube Sampling for efficient DoE initialization
+  - Reduced subsystem evaluations through surrogate modeling
 
 ### Advantages
 
-- Reduced subsystem calls (5-10x fewer than CO)
-    - Better for expensive analysis codes
-    - Uncertainty quantification via GP variance
-    - Adaptive sampling focuses on promising reg_ions
+- Reduced subsystem calls
+  - Better for expensive analysis codes
+  - Uncertainty quantification via GP variance
+  - Adaptive sampling focuses on promising reg_ions
 
-### Configuration
+## Implementation
 
-- SMTGPConfig: GP hyperparameters, kernel settings
-    - DoE size: Initial sampling (typically 5-20 points per subsystem)
-    - Acquisition function: Expected Improvement (log_ei)
+### BACOSubsystem
 
-## BACOSubsystem
-
-### Attributes
-
-problem: Problem
-        Local subsystem problem definition
-    z_idxs: ndarray
-        Indices of shared design variables
-    x_idxs: ndarray
-        Indices of local design variables
-    y_idxs: ndarray
-        Indices of subsystem outputs
-    y_coupled_idxs: List[ndarray]
-        Coupled variable indices from other subsystems
-    surrogate_config: SMTGPConfig
-        GP configuration (kernel, hyperparameters)
-    doe_J_i: DoE
-        Design of Experiments for discrepancy J_i
-    doe_g_i: DoE
-        Design of Experiments for constraints g_i
-    gp_J_i: GP model
-        Trained surrogate for J_i objective
-    gp_g_i: dict
-        Trained surrogates for each constraint {name: GP}
-    z_under_i, x_under_i, y_i: ndarray
-        Current subsystem variable values
-    best_J_i, best_h: float
-        Best achieved discrepancy and constraint violation
+| Attribute          | Type                           | Description                                                                |
+|:-------------------|:-------------------------------|:---------------------------------------------------------------------------|
+| `problem`          | `Problem`                      | Local subsystem optimization problem with objective and constraints        |
+| `z_idxs`           | `np.ndarray`                   | Indices of shared design variables in the global variable vector           |
+| `x_idxs`           | `np.ndarray`                   | Indices of local design variables in the global variable vector            |
+| `y_idxs`           | `np.ndarray`                   | Indices of subsystem outputs in the global output vector                   |
+| `y_coupled_idxs`   | `np.ndarray`                   | list of index arrays for coupled variables (targets) from other subsystems |
+| `surrogate_config` | `SMTGPConfig \| TorchGPConfig` | GP configuration                                                           |
 
 Workflow:
-    1. initialize_doe(): LHS sampling to create initial DoE
-    2. build_surrogate_J_i(), build_surrogate_g_i(): Train GP surrogates
-    3. solve_acquisition(): Optimize acquisition function
-    4. Update DoE and retrain (repeat)
 
-## initialize_doe
+1. initialize_doe(): LHS sampling to create initial DoE
+2. build_surrogate_J_i(), build_surrogate_g_i(): Train GP surrogates
+3. solve_acquisition(): Optimize acquisition function
+4. Update DoE and retrain (repeat)
 
-### Notes
+### BACOSystem
 
-- Uses Latin Hypercube for space-filling design
-    - Samples from subsystem variable bounds [z_under_i, x_under_i]
-    - Evaluates actual discipline for each sample
-    - Forms baseline for GP training
+| Attribute          | Type                           | Description                                                      |
+|:-------------------|:-------------------------------|:-----------------------------------------------------------------|
+| `problem`          | `Problem`                      | System-level optimization problem with objective and constraints |
+| `subsystems`       | `list[COSubsystem]`            | All subsystems in the MDO problem                                |
+| `surrogate_config` | `SMTGPConfig \| TorchGPConfig` | GP configuration                                                 |
 
-Example:
-    >>> subsystem.initialize_doe(
-    ...     n_samples=20,
-    ...     z_bar=np.array([1.0, 2.0]),
-    ...     x_bar=np.array([0.5]),
-    ...     y_bar=np.array([1.0, 1.5])
-    ... )
+### BayesianCollaborativeOptimization
 
-## build_surrogate_J_i
-
-### Notes
-
-- Must call initialize_doe() first
-    - GP trained on all DoE samples
-    - Hyperparameters optimized during training
-    - Model ready for predict_values() calls
-
-Example:
-    >>> subsystem.initialize_doe(n_samples=20, z_bar, x_bar, y_bar)
-    >>> subsystem.build_surrogate_J_i()
-    >>> # Now can predict: subsystem.gp_J_i.predict_values(X_new)
-
-## build_surrogate_g_i
-
-### Notes
-
-- Must call initialize_doe() first
-    - One GP per constraint in self.problem.constraints
-    - Each GP predicts g_i(z_under_i, x_under_i, y_coupled)
-    - Used to enforce constraints in acquisition optimization
-
-Example:
-    >>> subsystem.build_surrogate_g_i()
-    >>> # Predict constraint 'stress' at new point
-    >>> X_test = np.array([[1.0, 2.0, 3.0]])
-    >>> g_pred = subsystem.gp_g_i['stress'].predict_values(X_test)
-
-## solve_acquisition
-
-### Notes
-
-- Acquisition maximized = minimize negative acquisition
-    - GP mean predictions used for constraint handling
-    - True function evaluated at optimal acquisition point
-    - DoE automatically updated for next GP training
-
-Example:
-    >>> from mdotoolbox.surrogates import log_ei
-    >>> subsystem.solve_acquisition(
-    ...     z_bar=np.array([1.0, 2.0]),
-    ...     x_bar=np.array([0.5]),
-    ...     y_bar=np.array([1.0, 1.5]),
-    ...     optimizer='cobyqa',
-    ...     acq_func=log_ei,
-    ...     n_multistart=20
-    ... )
-
+| Attribute             | Type                      | Description                                                                           |
+|:----------------------|:--------------------------|:--------------------------------------------------------------------------------------|
+| `system`              | `COSystem`                | System-level coordinator with subsystems                                              |
+| `subsystem_optimizer` | `str \| Callable`         | Optimizer for subsystem minimization (e.g., 'cobyqa', 'cobyla')                       |
+| `system_optimizer`    | `str \| Callable`         | Optimizer for system-level coordination.                                              |
+| `n_initial`           | `int \| Callable \| None` | Size of the initial Design of Experiments.                                            |
+| `acq_func`            | `Callable \| None`        | Choice of acquisition function.                                                       |
+| `n_multistart`        | `int`                     | Number of multi-starts when solving $\widetilde{P}_\text{sys}$ and $\widetilde{P}_i$. |
+| `epsilon_J`           | `float`                   | Convergence tolerance for coupling discrepancy J_total (default: 1e-6)                |
+| `epsilon_h`           | `float`                   | Convergence tolerance for constraint violation h_total (default: 1e-6)                |
+| `max_eval`            | `int \| None`             | Evaluation budget.                                                                    |
+| `cache_dir`           | `Path`                    | Directory to save intermediate progress in case code crashes.                         |
+| `name`                | `str`                     | Field to define problem name                                                          |
+| `solver`              | `str`                     | Field to define solver name (default = "CO")                                          |

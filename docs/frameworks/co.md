@@ -1,206 +1,236 @@
-# CO Framework
+# Collaborative Optimization Framework
 
-Extracted documentation from `src/mdotoolbox/frameworks/co.py`.
-
-## Overview
-
-### Mathematical Formulation
+## Mathematical Formulation
 
 System Level:
-        min_{z_bar, x_bar, y_bar} f(z_bar, x_bar, y_bar)
-        s.t.  g_sys(z_bar, x_bar, y_bar) >= 0
-              J_i = 0  for all i  (strict consistency)
 
-    Subsystem Level i:
-        min_{z_under_i, x_under_i}  J_i(z_under_i, x_under_i; z_bar, x_bar_i, y_bar_i)
-        s.t.  g_i(z_under_i, x_under_i, y_bar_coupled) >= 0
+$$
+\begin{align*}
+    &\min_{
+        \overline{\bm{z}},
+        \overline{\bm{x}},
+        \overline{\bm{y}}
+    }\quad&&f(
+        \overline{\bm{z}},
+        \overline{\bm{x}},
+        \overline{\bm{y}}
+    ) \tag{\(P_\text{sys}\)} \\
+    &\text{subject to:}\quad&&\bm{c}(
+        \overline{\bm{z}},
+        \overline{\bm{x}},
+        \overline{\bm{y}},
+    ) &&\geq \bm{0}\nonumber\\
+    %
+    &  && J(
+        \overline{\bm{z}},
+        \overline{\bm{x}}_i,
+        \overline{\bm{y}},
+        \underline{\bm{z}}_i^*,
+        \underline{\bm{x}}_i^*
+    ) &&= 0\quad \text{for all}\quad i\in\{1, \ldots, N\}
+\end{align*}
+$$
 
-        where J_i = ||z_bar - z_under_i||**2 + ||x_bar_i - x_under_i||**2 + ||y_bar_i - y_i(z_under_i, x_under_i)||**2
+Subsystem $i$ level:
 
-Key Components:
-    - COSubsystem: Individual discipline (inherits from BaseSubsystem)
-    - COSystem: System-level coordinator (inherits from BaseSystem)
-    - CollaborativeOptimization: Main solver (inherits from BaseSolver)
+$$
+\begin{equation}
+    \min_{
+        \underline{\bm{z}}_i,
+        \underline{\bm{x}}_i
+    }\quad J(
+        \overline{\bm{z}},
+        \overline{\bm{x}}_i,
+        \overline{\bm{y}},
+        \underline{\bm{z}}_i,
+        \underline{\bm{x}}_i
+    ) \tag{\(P_i\)}\quad
+    \text{subject to:}\quad\bm{g}_i(
+        \overline{\bm{y}}_{j\neq i},
+        \underline{\bm{z}}_i,
+        \underline{\bm{x}}_i
+    )\geq\bm{0}
+\end{equation}
+$$
 
-For implementation details of the base bilevel structure, see:
-    - BaseSubsystem: Common subsystem optimization logic
-    - BaseSystem: Common system-level coordination
-    - BaseSolver: Common iteration and budget management
+The discrepancy function:
 
-Features:
-    - Parallel subsystem optimization capability
-    - Flexible budget management (system vs subsystem allocation)
-    - Comprehensive iteration history tracking
-    - Convergence based on coupling discrepancy epsilon
+$$
+\begin{equation*}
+    J(
+        \overline{\bm{z}},
+        \overline{\bm{x}}_i,
+        \overline{\bm{y}},
+        \underline{\bm{z}}_i,
+        \underline{\bm{x}}_i
+    ) = J_i =
+        \bigl\|\overline{\bm{z}}-\underline{\bm{z}}_i\bigr\|^2 +
+        \bigl\|\overline{\bm{x}}_i-\underline{\bm{x}}_i\bigr\|^2 +
+        \bigl\|\overline{\bm{y}}_i-\bm{y}_i\bigl(
+        \overline{\bm{y}}_{j\neq i},
+        \underline{\bm{z}}_i,
+        \underline{\bm{x}}_i
+    \bigr)\bigr\|^2
+\end{equation*}
+$$
 
 References:
-    Braun, R. D., & Kroo, I. M. (1997). "Development and Application of the
-    Collaborative Optimization Architecture in a Multidisciplinary Design
-    Environment." In Multidisciplinary design optimization: State of the art.
 
-## COSubsystem
+- Braun, R. D., & Kroo, I. M. (1997). "Development and Application of the
+- Collaborative Optimization Architecture in a Multidisciplinary Design
+- Environment." In Multidisciplinary design optimization: State of the art.
 
-### Attributes
+## Implementation
 
-problem: Problem
-        Local subsystem optimization problem with objective and constraints
-    z_idxs: ndarray
-        Indices of shared design variables in the global variable vector
-    x_idxs: ndarray
-        Indices of local design variables in the global variable vector
-    y_idxs: ndarray
-        Indices of subsystem outputs in the global output vector
-    y_bar_coupled_idxs: List[ndarray]
-        List of index arrays for coupled variables (targets) from other subsystems
-    z_under_i: ndarray
-        Subsystem's copy of shared variables (optimized to match z_bar)
-    x_under_i: ndarray
-        Subsystem's local variables
-    y_i: ndarray
-        Actual subsystem outputs from discipline analysis
-    best_J_i: float
-        Best (lowest) discrepancy achieved
-    best_h: float
-        Best (lowest) constraint violation achieved
-    iteration_history: List[dict]
-        History of subsystem optimization iterations
+Key Components:
+
+- COSubsystem: Individual discipline (inherits from BaseSubsystem)
+- COSystem: System-level coordinator (inherits from BaseSystem)
+- CollaborativeOptimization: Main solver (inherits from BaseSolver)
+
+For implementation details of the base bilevel structure, see:
+
+- BaseSubsystem: Common subsystem optimization logic
+- BaseSystem: Common system-level coordination
+- BaseSolver: Common iteration and budget management
+
+Features:
+
+- Parallel subsystem optimization capability
+- Flexible budget management (system vs subsystem allocation)
+- Comprehensive iteration history tracking
+- Convergence based on coupling discrepancy epsilon
+
+### COSubsystem
+
+| Attribute        | Type         | Description                                                                |
+|:-----------------|:-------------|:---------------------------------------------------------------------------|
+| `problem`        | `Problem`    | Local subsystem optimization problem with objective and constraints        |
+| `z_idxs`         | `np.ndarray` | Indices of shared design variables in the global variable vector           |
+| `x_idxs`         | `np.ndarray` | Indices of local design variables in the global variable vector            |
+| `y_idxs`         | `np.ndarray` | Indices of subsystem outputs in the global output vector                   |
+| `y_coupled_idxs` | `np.ndarray` | list of index arrays for coupled variables (targets) from other subsystems |
 
 Example:
-    >>> from mdotoolbox.core import Problem, Function
-    >>> # Define discipline problem
-    >>> y_func = Function(func=lambda z, x: z**2 + x, x=['z', 'x'], name='disc1')
-    >>> problem = Problem(objective=y_func, lbounds=[0, 0], ubounds=[10, 10])
-    >>>
-    >>> # Create subsystem
-    >>> subsystem = COSubsystem(
-    ...     problem=problem,
-    ...     z_idxs=[0],  # First variable is shared
-    ...     x_idxs=[1],  # Second variable is local
-    ...     y_idxs=[0],  # First output
-    ...     y_bar_coupled_idxs=[]  # No coupling
-    ... )
 
-## COSystem
+```python
+from mdotoolbox.core import Problem, Function
 
-### Attributes
+# Define discipline problem
+y_func = Function(func=lambda z, x: z**2 + x, x=["z", "x"], name="disc1")
+problem = Problem(objective=y_func, lbounds=[0, 0], ubounds=[10, 10])
 
-problem: Problem
-        System-level optimization problem with objective and constraints
-    subsystems: List[COSubsystem]
-        All subsystems in the MDO problem
-    z_bar: ndarray
-        Current shared design variables
-    x_bar: ndarray
-        System-level targets for local variables (concatenated from all subsystems)
-    y_bar: ndarray
-        System-level targets for coupling variables (concatenated from all subsystems)
-    iteration_history: List[dict]
-        System-level optimization iteration metrics
-    best_J_total: float
-        Best total discrepancy (sum of all J_i)
-    best_h_total: float
-        Best system constraint violation
-    best_f_bar: float
-        Best system objective value
+# Create subsystem
+subsystem = COSubsystem(
+    problem=problem,
+    z_idxs=[0],  # First variable is shared
+    x_idxs=[1],  # Second variable is local
+    y_idxs=[0],  # First output
+    y_bar_coupled_idxs=[],  # No coupling
+)
+```
+
+### COSystem
+
+| Attribute    | Type                | Description                                                      |
+|:-------------|:--------------------|:-----------------------------------------------------------------|
+| `problem`    | `Problem`           | System-level optimization problem with objective and constraints |
+| `subsystems` | `list[COSubsystem]` | All subsystems in the MDO problem                                |
 
 Workflow:
-    1. Receive discrepancies J_i from subsystems
-    2. Optimize system objective subject to J_i = 0 and system constraints
-    3. Return updated targets (z_bar, x_bar, y_bar) to subsystems
-    4. Repeat until convergence
+
+1. Receive discrepancies J_i from subsystems
+2. Optimize system objective subject to J_i = 0 and system constraints
+3. Return updated targets (z_bar, x_bar, y_bar) to subsystems
+4. Repeat until convergence
 
 Example:
-    >>> system = COSystem(
-    ...     problem=system_problem,
-    ...     subsystems=[subsystem1, subsystem2]
-    ... )
-    >>> # System solves for optimal targets
-    >>> z_bar, x_bar, y_bar, f, h, n_evals = system.solve(
-    ...     optimizer='cobyqa',
-    ...     system_iter=1,
-    ...     global_start_time=time.time()
-    ... )
 
-## CollaborativeOptimization
+```python
+f_func = Function(func=lambda z, x: z**2 + x, x=["z", "x"], name="disc1")
+system_problem = Problem(objective=y_func, lbounds=[0, 0], ubounds=[10, 10])
 
-### Attributes
+system = COSystem(problem=system_problem, subsystems=[subsystem1, subsystem2])
+```
 
-system: COSystem
-        System-level coordinator with subsystems
-    subsystem_optimizer: str or Callable
-        Optimizer for subsystem minimization (e.g., 'cobyqa', 'cobyla')
-    system_optimizer: str or Callable
-        Optimizer for system-level coordination
-    epsilon_J: float, optional
-        Convergence tolerance for coupling discrepancy J_total (default: 1e-6)
-    epsilon_h: float, optional
-        Convergence tolerance for constraint violation h_total (default: 1e-6)
-    budget: BudgetManager or int, optional
-        Budget allocation strategy. If int, creates weighted budget manager.
-        (default: 100)
-    max_iter: int or None, optional
-        Maximum number of CO iterations. None for unlimited. (default: None)
+### CollaborativeOptimization
 
-Budget Management:
-    Three modes available via BudgetManager:
+| Attribute             | Type                   | Description                                                            |
+|:----------------------|:-----------------------|:-----------------------------------------------------------------------|
+| `system`              | `COSystem`             | System-level coordinator with subsystems                               |
+| `subsystem_optimizer` | `str \| Callable`      | Optimizer for subsystem minimization (e.g., 'cobyqa', 'cobyla')        |
+| `system_optimizer`    | `str \| Callable`      | Optimizer for system-level coordination                                |
+| `epsilon_J`           | `float`                | Convergence tolerance for coupling discrepancy J_total (default: 1e-6) |
+| `epsilon_h`           | `float`                | Convergence tolerance for constraint violation h_total (default: 1e-6) |
+| `budget`              | `BudgetManager \| int` | Budget allocation strategy. If int, creates weighted budget manager.   |
+| `max_iter`            | `int \| None`          | Maximum number of CO iterations. None for unlimited. (default: None)   |
+| `max_eval`            | `int \| None`          | Equivalent to `budget` as integer.                                     |
+| `cache_dir`           | `Path`                 | Directory to save intermediate progress in case code crashes.          |
+| `name`                | `str`                  | Field to define problem name                                           |
+| `solver`              | `str`                  | Field to define solver name (default = "CO")                           |
 
-    1. Weighted (recommended):
-        - Distributes total_budget proportionally
-        - system_ratio: fraction for system level
-        - subsystem_weights: relative allocation per subsystem
-        - iteration_ratio: min budget per iteration
+Three modes available via BudgetManager:
 
-    2. Fixed:
-        - Explicit budgets for each subsystem and system
-        - system_budget: evaluations for system
-        - subsystem_budgets: list of budgets per subsystem
+1. Weighted (recommended):
 
-    3. Shared:
-        - Single pool shared by all levels
-        - First-come, first-served allocation
+   - Distributes total_budget proportionally
+   - system_ratio: fraction for system level
+   - subsystem_weights: relative allocation per subsystem
+   - iteration_ratio: min budget per iteration
 
-### Examples
+2. Fixed:
 
->>> # Basic usage with integer budget
-    >>> solver = CollaborativeOptimization(
-    ...     system=co_system,
-    ...     subsystem_optimizer='cobyqa',
-    ...     system_optimizer='cobyqa',
-    ...     epsilon_J=1e-6,
-    ...     epsilon_h=1e-6,
-    ...     budget=400
-    ... )
-    >>>
-    >>> # Weighted budget allocation
-    >>> budget = BudgetManager(
-    ...     mode='weighted',
-    ...     total_budget=500,
-    ...     system_ratio=0.4,
-    ...     subsystem_weights=[0.6, 0.4],  # 60% to subsys 1, 40% to subsys 2
-    ...     iteration_ratio=0.05
-    ... )
-    >>> solver = CollaborativeOptimization(
-    ...     system=co_system,
-    ...     subsystem_optimizer='cobyla',
-    ...     system_optimizer='slsqp',
-    ...     budget=budget
-    ... )
-    >>>
-    >>> # Solve the problem
-    >>> z_bar0 = np.array([1.0, 2.0])
-    >>> x_bar0 = np.array([0.5])
-    >>> y_bar0 = np.array([1.0, 1.0])
-    >>> z_under0 = np.array([1.0, 2.0])
-    >>> x_under0 = np.array([0.5])
-    >>> result = solver.solve(z_bar0, x_bar0, y_bar0, z_under0, x_under0)
-    >>>
-    >>> print(f"Optimal objective: {result.best.f_bar}")
-    >>> print(f"Final discrepancy: {result.best.J_total}")
+   - Explicit budgets for each subsystem and system
+   - system_budget: evaluations for system
+   - subsystem_budgets: list of budgets per subsystem
+
+3. Shared:
+
+   - Single pool shared by all levels
+   - First-come, first-served allocation
+
+### Example - Basic usage with integer budget
+
+```python
+solver = CollaborativeOptimization(
+    system=co_system,
+    subsystem_optimizer="cobyqa",
+    system_optimizer="cobyqa",
+    epsilon_J=1e-6,
+    epsilon_h=1e-6,
+    budget=400,
+)
+
+# Weighted budget allocation
+budget = BudgetManager(
+    mode="weighted",
+    total_budget=500,
+    system_ratio=0.4,
+    subsystem_weights=[0.6, 0.4],  # 60% to subsys 1, 40% to subsys 2
+    iteration_ratio=0.05,
+)
+solver = CollaborativeOptimization(
+    system=co_system,
+    subsystem_optimizer="cobyla",
+    system_optimizer="slsqp",
+    budget=budget,
+)
+
+# Solve the problem
+z_bar0 = np.array([1.0, 2.0])
+x_bar0 = np.array([0.5])
+y_bar0 = np.array([1.0, 1.0])
+z_under0 = np.array([1.0, 2.0])
+x_under0 = np.array([0.5])
+result = solver.solve(z_bar0, x_bar0, y_bar0, z_under0, x_under0)
+
+print(f"Optimal objective: {result.best.f_bar}")
+print(f"Final discrepancy: {result.best.J_total}")
+```
 
 ### Notes
 
-- Convergence requires all J_i <= epsilon_J AND feasibility (h_total <= epsilon_h)
-    - System targets (z_bar, x_bar, y_bar) updated each iteration
-    - Subsystems optimize in parallel conceptually
-    - Budget exhaustion triggers early termination
-
+- Convergence requires $\sum_i^N J_i = J_\text{total} \leq \epsilon_J$ AND feasibility $h_\text{total} <= \epsilon_h$
+  - System targets (z_bar, x_bar, y_bar) updated each iteration
+  - Subsystems optimize in parallel conceptually
+  - Budget exhaustion triggers early termination

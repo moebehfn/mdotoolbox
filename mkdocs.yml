@@ -1,29 +1,10 @@
 site_name: mdotoolbox
-theme:
-  name: material
-
-plugins:
-  - search
-  - mkdocstrings:
-      handlers:
-        python:
-          paths: [src]
-
-markdown_extensions:
-  - pymdownx.arithmatex:
-      generic: true
-
-extra_javascript:
-  - javascripts/mathjax.js
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
-  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+site_url: https://moebehfn.github.io/mdotoolbox/
+strict: true
 
 nav:
   - Home: index.md
   - Tutorial: tutorial.md
-  - Guides:
-      - MDO Structure: guides/mdo_structure.md
-      - Mathematical Foundation: guides/math.md
   - Frameworks:
       - CO: frameworks/co.md
       - BACO: frameworks/baco.md
@@ -32,3 +13,41 @@ nav:
       - Core Base API: api/core.md
   - Contributing: CONTRIBUTING.md
   - License: LICENSE.md
+    
+theme:
+  name: material
+  palette:
+    primary: indigo
+    accent: indigo
+  features:
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            show_source: true
+            show_root_heading: true
+            show_submodules: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+
+copyright: "Copyright &copy; 2026 MDOToolbox"
