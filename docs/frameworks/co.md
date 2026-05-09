@@ -7,27 +7,27 @@ System Level:
 $$
 \begin{align*}
     &\min_{
-        \overline{\bm{z}},
-        \overline{\bm{x}},
-        \overline{\bm{y}}
-    }\quad&&f(
-        \overline{\bm{z}},
-        \overline{\bm{x}},
-        \overline{\bm{y}}
+        \overline{\mathbf{z}},
+        \overline{\mathbf{x}},
+        \overline{\mathbf{y}}
+    }\ &&f(
+        \overline{\mathbf{z}},
+        \overline{\mathbf{x}},
+        \overline{\mathbf{y}}
     ) \tag{\(P_\text{sys}\)} \\
-    &\text{subject to:}\quad&&\bm{c}(
-        \overline{\bm{z}},
-        \overline{\bm{x}},
-        \overline{\bm{y}},
-    ) &&\geq \bm{0}\nonumber\\
+    &\text{subject to:}\ &&\mathbf{c}(
+        \overline{\mathbf{z}},
+        \overline{\mathbf{x}},
+        \overline{\mathbf{y}},
+    ) &&\geq \mathbf{0}\nonumber\\
     %
     &  && J(
-        \overline{\bm{z}},
-        \overline{\bm{x}}_i,
-        \overline{\bm{y}},
-        \underline{\bm{z}}_i^*,
-        \underline{\bm{x}}_i^*
-    ) &&= 0\quad \text{for all}\quad i\in\{1, \ldots, N\}
+        \overline{\mathbf{z}},
+        \overline{\mathbf{x}}_i,
+        \overline{\mathbf{y}},
+        \underline{\mathbf{z}}_i^*,
+        \underline{\mathbf{x}}_i^*
+    ) &&= 0\ \text{for all}\ i\in\{1, \ldots, N\}
 \end{align*}
 $$
 
@@ -36,20 +36,20 @@ Subsystem $i$ level:
 $$
 \begin{equation}
     \min_{
-        \underline{\bm{z}}_i,
-        \underline{\bm{x}}_i
-    }\quad J(
-        \overline{\bm{z}},
-        \overline{\bm{x}}_i,
-        \overline{\bm{y}},
-        \underline{\bm{z}}_i,
-        \underline{\bm{x}}_i
-    ) \tag{\(P_i\)}\quad
-    \text{subject to:}\quad\bm{g}_i(
-        \overline{\bm{y}}_{j\neq i},
-        \underline{\bm{z}}_i,
-        \underline{\bm{x}}_i
-    )\geq\bm{0}
+        \underline{\mathbf{z}}_i,
+        \underline{\mathbf{x}}_i
+    }\ J(
+        \overline{\mathbf{z}},
+        \overline{\mathbf{x}}_i,
+        \overline{\mathbf{y}},
+        \underline{\mathbf{z}}_i,
+        \underline{\mathbf{x}}_i
+    ) \tag{\(P_i\)}\
+    \text{subject to:}\ \mathbf{g}_i(
+        \overline{\mathbf{y}}_{j\neq i},
+        \underline{\mathbf{z}}_i,
+        \underline{\mathbf{x}}_i
+    )\geq\mathbf{0}
 \end{equation}
 $$
 
@@ -58,18 +58,18 @@ The discrepancy function:
 $$
 \begin{equation*}
     J(
-        \overline{\bm{z}},
-        \overline{\bm{x}}_i,
-        \overline{\bm{y}},
-        \underline{\bm{z}}_i,
-        \underline{\bm{x}}_i
+        \overline{\mathbf{z}},
+        \overline{\mathbf{x}}_i,
+        \overline{\mathbf{y}},
+        \underline{\mathbf{z}}_i,
+        \underline{\mathbf{x}}_i
     ) = J_i =
-        \bigl\|\overline{\bm{z}}-\underline{\bm{z}}_i\bigr\|^2 +
-        \bigl\|\overline{\bm{x}}_i-\underline{\bm{x}}_i\bigr\|^2 +
-        \bigl\|\overline{\bm{y}}_i-\bm{y}_i\bigl(
-        \overline{\bm{y}}_{j\neq i},
-        \underline{\bm{z}}_i,
-        \underline{\bm{x}}_i
+        \bigl\|\overline{\mathbf{z}}-\underline{\mathbf{z}}_i\bigr\|^2 +
+        \bigl\|\overline{\mathbf{x}}_i-\underline{\mathbf{x}}_i\bigr\|^2 +
+        \bigl\|\overline{\mathbf{y}}_i-\mathbf{y}_i\bigl(
+        \overline{\mathbf{y}}_{j\neq i},
+        \underline{\mathbf{z}}_i,
+        \underline{\mathbf{x}}_i
     \bigr)\bigr\|^2
 \end{equation*}
 $$
@@ -103,13 +103,13 @@ Features:
 
 ### COSubsystem
 
-| Attribute        | Type         | Description                                                                |
-|:-----------------|:-------------|:---------------------------------------------------------------------------|
-| `problem`        | `Problem`    | Local subsystem optimization problem with objective and constraints        |
-| `z_idxs`         | `np.ndarray` | Indices of shared design variables in the global variable vector           |
-| `x_idxs`         | `np.ndarray` | Indices of local design variables in the global variable vector            |
-| `y_idxs`         | `np.ndarray` | Indices of subsystem outputs in the global output vector                   |
-| `y_coupled_idxs` | `np.ndarray` | list of index arrays for coupled variables (targets) from other subsystems |
+| Attribute        | Type         | Description                                                                 |
+|:-----------------|:-------------|:----------------------------------------------------------------------------|
+| `problem`        | `Problem`    | Local subsystem optimization problem with objective and constraints.        |
+| `z_idxs`         | `np.ndarray` | Indices of shared design variables in the global variable vector.           |
+| `x_idxs`         | `np.ndarray` | Indices of local design variables in the global variable vector.            |
+| `y_idxs`         | `np.ndarray` | Indices of subsystem outputs in the global output vector.                   |
+| `y_coupled_idxs` | `np.ndarray` | list of index arrays for coupled variables (targets) from other subsystems. |
 
 Example:
 
@@ -132,10 +132,10 @@ subsystem = COSubsystem(
 
 ### COSystem
 
-| Attribute    | Type                | Description                                                      |
-|:-------------|:--------------------|:-----------------------------------------------------------------|
-| `problem`    | `Problem`           | System-level optimization problem with objective and constraints |
-| `subsystems` | `list[COSubsystem]` | All subsystems in the MDO problem                                |
+| Attribute    | Type                | Description                                                       |
+|:-------------|:--------------------|:------------------------------------------------------------------|
+| `problem`    | `Problem`           | System-level optimization problem with objective and constraints. |
+| `subsystems` | `list[COSubsystem]` | All subsystems in the MDO problem.                                |
 
 Workflow:
 
@@ -155,19 +155,19 @@ system = COSystem(problem=system_problem, subsystems=[subsystem1, subsystem2])
 
 ### CollaborativeOptimization
 
-| Attribute             | Type                   | Description                                                            |
-|:----------------------|:-----------------------|:-----------------------------------------------------------------------|
-| `system`              | `COSystem`             | System-level coordinator with subsystems                               |
-| `subsystem_optimizer` | `str \| Callable`      | Optimizer for subsystem minimization (e.g., 'cobyqa', 'cobyla')        |
-| `system_optimizer`    | `str \| Callable`      | Optimizer for system-level coordination                                |
-| `epsilon_J`           | `float`                | Convergence tolerance for coupling discrepancy J_total (default: 1e-6) |
-| `epsilon_h`           | `float`                | Convergence tolerance for constraint violation h_total (default: 1e-6) |
-| `budget`              | `BudgetManager \| int` | Budget allocation strategy. If int, creates weighted budget manager.   |
-| `max_iter`            | `int \| None`          | Maximum number of CO iterations. None for unlimited. (default: None)   |
-| `max_eval`            | `int \| None`          | Equivalent to `budget` as integer.                                     |
-| `cache_dir`           | `Path`                 | Directory to save intermediate progress in case code crashes.          |
-| `name`                | `str`                  | Field to define problem name                                           |
-| `solver`              | `str`                  | Field to define solver name (default = "CO")                           |
+| Attribute             | Type                     | Description                                                          |
+|:----------------------|:-------------------------|:---------------------------------------------------------------------|
+| `system`              | `COSystem`               | System-level coordinator with subsystems.                            |
+| `subsystem_optimizer` | `str` or `Callable`      | Optimizer for subsystem minimization (e.g., 'cobyqa', 'cobyla').     |
+| `system_optimizer`    | `str` or `Callable`      | Optimizer for system-level coordination.                             |
+| `epsilon_J`           | `float`                  | Convergence tolerance for coupling discrepancy $J_\text{total}$.     |
+| `epsilon_h`           | `float`                  | Convergence tolerance for constraint violation $h_\text{total}$.     |
+| `budget`              | `BudgetManager` or `int` | Budget allocation strategy. If int, creates weighted budget manager. |
+| `max_iter`            | `int`                    | Maximum number of CO iterations. None for unlimited.                 |
+| `max_eval`            | `int`                    | Equivalent to `budget` as integer.                                   |
+| `cache_dir`           | `Path`                   | Directory to save intermediate progress in case code crashes.        |
+| `name`                | `str`                    | Field to define problem name.                                        |
+| `solver`              | `str`                    | Field to define solver name.                                         |
 
 Three modes available via BudgetManager:
 
@@ -231,6 +231,6 @@ print(f"Final discrepancy: {result.best.J_total}")
 ### Notes
 
 - Convergence requires $\sum_i^N J_i = J_\text{total} \leq \epsilon_J$ AND feasibility $h_\text{total} <= \epsilon_h$
-  - System targets (z_bar, x_bar, y_bar) updated each iteration
-  - Subsystems optimize in parallel conceptually
-  - Budget exhaustion triggers early termination
+- System targets (z_bar, x_bar, y_bar) updated each iteration
+- Subsystems optimize in parallel conceptually
+- Budget exhaustion triggers early termination
