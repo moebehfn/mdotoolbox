@@ -1,27 +1,26 @@
-# MDOToolbox
-
-**Multi-Disciplinary Optimization with Bayesian Collaborative Frameworks**
+# MDOToolbox: Multidisciplinary Design Optimization with Bayesian Collaborative Frameworks
 
 MDOToolbox is a Python library for solving multi-disciplinary optimization (MDO) problems using hierarchical decomposition and Bayesian optimization. It provides five optimization frameworks, Gaussian Process surrogates, and a suite of built-in benchmark problems for rapid prototyping and research.
 
-## Cite us
+## Cite us (preprint)
 
 ```bibtex
-@inproceedings{baco2026,
-    author      = {Belhafnaoui, Mohamed Ali and Diouane, Youssef},
-    title       = {{A Bayesian Algorithm for Collaborative Optimization with Application to Aircraft Design}},
-    booktitle   = {{AIAA Aviation 2026}},
-    year        = {2026},
-    address     = {San-Diego, California},
-    month       = jun,
-    publisher   = {American Institute of Aeronautics and Astronautics},
-    % doi         = {xxx} 
+@misc{baco2026,
+      title         = {Bayesian Algorithm for Collaborative Optimization with Application to Aircraft Design}, 
+      author        = {Mohamed Ali Belhafnaoui and Youssef Diouane},
+      year          = {2026},
+      eprint        = {2605.05474},
+      archivePrefix = {arXiv},
+      primaryClass  = {math.OC},
+      url           = {https://arxiv.org/abs/2605.05474}, 
 }
 ```
 
+[Paper PDF](https://arxiv.org/pdf/2605.05474)
+
 ## Features
 
-- **Multiple MDO frameworks** — CO, BACO, ICO, MCO, and ECO for different problem classes
+- **Multiple MDO frameworks** CO, BACO, ICO, MCO, and ECO for different problem classes
 - **Bayesian optimization** with Gaussian Process surrogates for expensive black-box functions
 - **7 built-in benchmark problems** covering analytical, mechanical, thermal, biomedical, and chemical domains
 - **Parallel multi-start acquisition optimization** for robust global search
@@ -51,7 +50,7 @@ This example solves the classic Sellar benchmark problem using the Bayesian Coll
 import numpy as np
 from mdotoolbox.benchmarking import sellar_problem
 from mdotoolbox.frameworks import (
-    BayesianCollaborativeOptimisation,
+    BayesianCollaborativeOptimization,
     BACOSubsystem,
     BACOSystem,
 )
@@ -67,7 +66,7 @@ system = BACOSystem(
 )
 
 # Create and run solver
-solver = BayesianCollaborativeOptimisation(
+solver = BayesianCollaborativeOptimization(
     system=system,
     subsystem_optimizer="cobyqa",
     system_optimizer="cobyqa",
@@ -132,3 +131,10 @@ Apache License 2.0 — see [LICENSE](LICENSE) for details.
 - **Documentation:** [https://moebehfn.github.io/mdotoolbox/](https://moebehfn.github.io/mdotoolbox/)
 - **Repository:** [https://github.com/moebehfn/mdotoolbox](https://github.com/moebehfn/mdotoolbox)
 - **Author:** Mohamed Ali Belhafnaoui (<mohamed-ali.belhafnaoui@etud.polymtl.ca>)
+
+## Please consider supporting our other project: fluxwing
+
+Python library for simulating the aerodynamics of a wing at a given condition using VLM, as well as the structural loads using an Euler-Bernoulli solver:
+
+- [github](https://github.com/moebehfn/fluxwing)
+- [documentation](https://moebehfn.github.io/fluxwing)

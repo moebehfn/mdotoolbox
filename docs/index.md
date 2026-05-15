@@ -1,6 +1,4 @@
-# MDOToolbox
-
-**Multi-Disciplinary Optimization with Bayesian Collaborative Frameworks**
+# MDOToolbox: Multidisciplinary Design Optimization with Bayesian Collaborative Frameworks
 
 MDOToolbox is a Python library for solving multi-disciplinary optimization (MDO) problems using hierarchical decomposition and Bayesian optimization. It provides five optimization frameworks, Gaussian Process surrogates, and a suite of built-in benchmark problems for rapid prototyping and research.
 
@@ -18,9 +16,11 @@ MDOToolbox is a Python library for solving multi-disciplinary optimization (MDO)
 }
 ```
 
+[Paper PDF](https://arxiv.org/pdf/2605.05474)
+
 ## Features
 
-- **Multiple MDO frameworks** — CO, BACO, ICO, MCO, and ECO for different problem classes
+- **Multiple MDO frameworks** CO, BACO, ICO, MCO, and ECO for different problem classes
 - **Bayesian optimization** with Gaussian Process surrogates for expensive black-box functions
 - **7 built-in benchmark problems** covering analytical, mechanical, thermal, biomedical, and chemical domains
 - **Parallel multi-start acquisition optimization** for robust global search
@@ -31,7 +31,7 @@ MDOToolbox is a Python library for solving multi-disciplinary optimization (MDO)
 **Basic install:**
 
 ```bash
-pip install .
+pip install mdotoolbox
 ```
 
 **Development install (with test dependencies):**
@@ -40,7 +40,7 @@ pip install .
 pip install -e ".[test]"
 ```
 
-**Dependencies:** numpy, scipy, smt, joblib
+**Dependencies:** numpy, scipy, smt, joblib, numba, matplotlib, scikit-learn, gpytorch, torch, jaxtyping, typeguard, pandas, openmdao, openaerostruct, pymc.
 
 ## Quick Start
 
@@ -110,14 +110,12 @@ All benchmark functions return a dictionary with `system_problem` and `subsystem
 
 ## Project Structure
 
-```text
-src/mdotoolbox/
-├── core/           # Base classes (Problem, Function, Constraint, DoE)
-├── frameworks/     # CO, BACO, ICO, MCO, ECO implementations
-├── benchmarking/   # Built-in test problems
-├── optimizers/     # Optimizer wrappers
-├── surrogates/     # GP model builders and configurations
-└── process/        # Process management utilities
+```
+.
+├── src/mdotoolbox/   # Core library source
+├── docs/             # Documentation source
+├── pyproject.toml    # Build and dependency configuration
+└── README.md         # Project overview
 ```
 
 ## Contributing
@@ -126,9 +124,17 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, testing instructio
 
 ## License
 
-Apache License Version 2.0 — see [LICENSE.md](LICENSE.md) for details.
+Apache License 2.0 — see [LICENSE](LICENSE) for details.
 
 ## Links
 
+- **Documentation:** [https://moebehfn.github.io/mdotoolbox/](https://moebehfn.github.io/mdotoolbox/)
 - **Repository:** [https://github.com/moebehfn/mdotoolbox](https://github.com/moebehfn/mdotoolbox)
 - **Author:** Mohamed Ali Belhafnaoui (<mohamed-ali.belhafnaoui@etud.polymtl.ca>)
+
+## Please consider supporting our other project: fluxwing
+
+Python library for simulating the aerodynamics of a wing at a given condition using VLM, as well as the structural loads using an Euler-Bernoulli solver:
+
+- [github](https://github.com/moebehfn/fluxwing)
+- [documentation](https://moebehfn.github.io/fluxwing)
