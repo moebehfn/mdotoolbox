@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#mdotoolbox" class="md-skip">
+        <a href="#mdotoolbox-multidisciplinary-design-optimization-with-bayesian-collaborative-frameworks" class="md-skip">
           Skip to content
         </a>
       
@@ -369,6 +369,17 @@
     <span class="md-ellipsis">
       
         Links
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#please-consider-supporting-our-other-project-fluxwing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Please consider supporting our other project: fluxwing
       
     </span>
   </a>
@@ -834,6 +845,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#please-consider-supporting-our-other-project-fluxwing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Please consider supporting our other project: fluxwing
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -851,8 +873,7 @@
 
 
 
-<h1 id="mdotoolbox">MDOToolbox</h1>
-<p><strong>Multi-Disciplinary Optimization with Bayesian Collaborative Frameworks</strong></p>
+<h1 id="mdotoolbox-multidisciplinary-design-optimization-with-bayesian-collaborative-frameworks">MDOToolbox: Multidisciplinary Design Optimization with Bayesian Collaborative Frameworks</h1>
 <p>MDOToolbox is a Python library for solving multi-disciplinary optimization (MDO) problems using hierarchical decomposition and Bayesian optimization. It provides five optimization frameworks, Gaussian Process surrogates, and a suite of built-in benchmark problems for rapid prototyping and research.</p>
 <h2 id="cite-us-preprint">Cite us (preprint)</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nc">@misc</span><span class="p">{</span><span class="nl">baco2026</span><span class="p">,</span>
@@ -865,9 +886,10 @@
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">      </span><span class="na">url</span><span class="w">           </span><span class="p">=</span><span class="w"> </span><span class="s">{https://arxiv.org/abs/2605.05474}</span><span class="p">,</span><span class="w"> </span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">}</span>
 </code></pre></div>
+<p><a href="https://arxiv.org/pdf/2605.05474">Paper PDF</a></p>
 <h2 id="features">Features</h2>
 <ul>
-<li><strong>Multiple MDO frameworks</strong> — CO, BACO, ICO, MCO, and ECO for different problem classes</li>
+<li><strong>Multiple MDO frameworks</strong> CO, BACO, ICO, MCO, and ECO for different problem classes</li>
 <li><strong>Bayesian optimization</strong> with Gaussian Process surrogates for expensive black-box functions</li>
 <li><strong>7 built-in benchmark problems</strong> covering analytical, mechanical, thermal, biomedical, and chemical domains</li>
 <li><strong>Parallel multi-start acquisition optimization</strong> for robust global search</li>
@@ -875,12 +897,12 @@
 </ul>
 <h2 id="installation">Installation</h2>
 <p><strong>Basic install:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>pip<span class="w"> </span>install<span class="w"> </span>.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>pip<span class="w"> </span>install<span class="w"> </span>mdotoolbox
 </code></pre></div>
 <p><strong>Development install (with test dependencies):</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[test]&quot;</span>
 </code></pre></div>
-<p><strong>Dependencies:</strong> numpy, scipy, smt, joblib</p>
+<p><strong>Dependencies:</strong> numpy, scipy, smt, joblib, numba, matplotlib, scikit-learn, gpytorch, torch, jaxtyping, typeguard, pandas, openmdao, openaerostruct, pymc.</p>
 <h2 id="quick-start">Quick Start</h2>
 <p>This example solves the classic Sellar benchmark problem using the Bayesian Collaborative Optimization (BACO) framework:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -997,22 +1019,27 @@
 </table>
 <p>All benchmark functions return a dictionary with <code>system_problem</code> and <code>subsystems</code> keys, ready to pass into any framework.</p>
 <h2 id="project-structure">Project Structure</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>src/mdotoolbox/
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>├── core/           # Base classes (Problem, Function, Constraint, DoE)
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>├── frameworks/     # CO, BACO, ICO, MCO, ECO implementations
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>├── benchmarking/   # Built-in test problems
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>├── optimizers/     # Optimizer wrappers
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>├── surrogates/     # GP model builders and configurations
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>└── process/        # Process management utilities
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>.
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>├── src/mdotoolbox/   # Core library source
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>├── docs/             # Documentation source
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>├── pyproject.toml    # Build and dependency configuration
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>└── README.md         # Project overview
 </code></pre></div>
 <h2 id="contributing">Contributing</h2>
 <p>See <a href="CONTRIBUTING/">CONTRIBUTING.md</a> for development setup, testing instructions, and contribution guidelines.</p>
 <h2 id="license">License</h2>
-<p>Apache License Version 2.0 — see <a href="LICENSE/">LICENSE.md</a> for details.</p>
+<p>Apache License 2.0 — see <a href="LICENSE">LICENSE</a> for details.</p>
 <h2 id="links">Links</h2>
 <ul>
+<li><strong>Documentation:</strong> <a href="https://moebehfn.github.io/mdotoolbox/">https://moebehfn.github.io/mdotoolbox/</a></li>
 <li><strong>Repository:</strong> <a href="https://github.com/moebehfn/mdotoolbox">https://github.com/moebehfn/mdotoolbox</a></li>
 <li><strong>Author:</strong> Mohamed Ali Belhafnaoui (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#109;&#111;&#104;&#97;&#109;&#101;&#100;&#45;&#97;&#108;&#105;&#46;&#98;&#101;&#108;&#104;&#97;&#102;&#110;&#97;&#111;&#117;&#105;&#64;&#101;&#116;&#117;&#100;&#46;&#112;&#111;&#108;&#121;&#109;&#116;&#108;&#46;&#99;&#97;">&#109;&#111;&#104;&#97;&#109;&#101;&#100;&#45;&#97;&#108;&#105;&#46;&#98;&#101;&#108;&#104;&#97;&#102;&#110;&#97;&#111;&#117;&#105;&#64;&#101;&#116;&#117;&#100;&#46;&#112;&#111;&#108;&#121;&#109;&#116;&#108;&#46;&#99;&#97;</a>)</li>
+</ul>
+<h2 id="please-consider-supporting-our-other-project-fluxwing">Please consider supporting our other project: fluxwing</h2>
+<p>Python library for simulating the aerodynamics of a wing at a given condition using VLM, as well as the structural loads using an Euler-Bernoulli solver:</p>
+<ul>
+<li><a href="https://github.com/moebehfn/fluxwing">github</a></li>
+<li><a href="https://moebehfn.github.io/fluxwing">documentation</a></li>
 </ul>
 
 
